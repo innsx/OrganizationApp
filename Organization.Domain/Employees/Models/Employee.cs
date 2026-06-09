@@ -1,0 +1,36 @@
+﻿using Organization.Domain.Commons.Models;
+using Organization.Domain.Commons.Utilities;
+
+namespace Organization.Domain.Employees.Models
+{
+    [TableName("tblEmployees")]
+    public sealed class Employee : IDbEntity
+    {
+        [PrimaryKey]
+        [ColumnName("Id")]
+        public string Id { get; set; } = ShortGuid.NewGuid();
+
+        [DistinguishingUniqueKey]
+        [ColumnName("Name")]
+        public string? Name { get; set; }
+
+        [ColumnName("Age")]
+        public int Age { get; set; }
+
+        [ColumnName("Position")]
+        public string? Position { get; set; }
+
+        [ForeignKey]
+        [ColumnName("CompanyId")]
+        public string? CompanyId { get; set; }
+
+        [ColumnName("CreatedOn")]
+        public DateTime CreatedOn { get; set; }
+
+        [ColumnName("ModifiedOn")]
+        public DateTime ModifiedOn { get; set; }
+
+        [ColumnName("Salary")]
+        public Decimal Salary { get; set; }
+    }
+}

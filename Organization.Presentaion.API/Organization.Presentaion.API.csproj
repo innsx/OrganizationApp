@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Configurations\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Organization.Infrastructure\Organization.Infrastructure.csproj" />
   </ItemGroup>
 
