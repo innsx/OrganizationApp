@@ -19,16 +19,19 @@ namespace Organization.Domain.Commons.Utilities
             if (selectedTableColumns.Length < 1)
             {
                 return string.Join(",", type.GetProperties()
-                    .Select(p => p.GetDbColumnName()))
-                    .TrimEnd(',');
+                                                     .Select(p => p.GetDbColumnName())
+                )
+                .TrimEnd(',');
             }
             else
             {
                 return string.Join(",", type.GetProperties()
-                    .Where(p => selectedTableColumns.ToLowerInvariant()
-                            .Contains(p.Name.ToLowerInvariant()))
-                            .Select(p => p.GetDbColumnName()))
-                            .TrimEnd(',');
+                                                     .Where(p => selectedTableColumns.ToLowerInvariant()
+                                                                        .Contains(p.Name.ToLowerInvariant())
+                                                     )
+                                                     .Select(p => p.GetDbColumnName())
+                )
+                .TrimEnd(',');
             }
         }
 

@@ -84,6 +84,10 @@ namespace Organization.Infrastructure.Persistance
             _dapperDataContext.Transaction = null;
         }
 
+
+        //In C#, where T : IDbEntity is a generic type constraint.
+        //It restricts the generic placeholder T so that it can only represent classes or structs
+        //that implement the IDbEntity interface
         public IGenericRepository<TEntity> RepositoryFactory<TEntity>() where TEntity : IDbEntity
         {
             return _repositoryFactory.CreateRepository<TEntity>(_dapperDataContext);

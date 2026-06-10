@@ -8,7 +8,7 @@ namespace Organization.Application.Commons.Interfaces.Persistance
         Task<TEntity> GetByIdAsync(string guid, params string[] selectData);
         Task<string> AddAsnyc(TEntity entity);
         Task UpdateAsync(TEntity entity);
-        Task SoftDeleteAsync(string id, bool isSoftDeleteFromRelatedChildTables = false);
+        Task SoftDeleteAsync(string id, bool isSoftDeleteRecordHasRelatedChildTableColumn = false); 
         Task<int> GetTotalCountAsync();
     }
 }

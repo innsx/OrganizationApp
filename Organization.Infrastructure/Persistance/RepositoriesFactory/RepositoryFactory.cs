@@ -20,6 +20,10 @@ namespace Organization.Infrastructure.Persistance.RepositoriesFactory
         //<TEntity>: A generic type parameter.
         //It tells the repository which specific database model or domain object
         //(e.g., Customer, Product, User) it should manage
+
+        //In C#, where T : IDbEntity is a generic type constraint.
+        //It restricts the generic placeholder T so that it can only represent classes or structs
+        //that implement the IDbEntity interface
         public IGenericRepository<TEntity> CreateRepository<TEntity>(DapperDataContext dapperDbContext) where TEntity : IDbEntity
         {
             var type = typeof(TEntity);

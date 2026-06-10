@@ -131,7 +131,7 @@ namespace Organization.Infrastructure.Persistance.Repositories
             }
         }
 
-        public async Task SoftDeleteAsync(string id, bool isSoftDeleteColumnHasRelatedChildTableColumn)
+        public async Task SoftDeleteAsync(string id, bool isSoftDeleteRecordHasRelatedChildTableColumn)
         {
             var parameters = new DynamicParameters();
             parameters.Add("tableName", typeof(TEntity).GetDbTableName(), DbType.String, ParameterDirection.Input, size: 50);
@@ -144,7 +144,7 @@ namespace Organization.Infrastructure.Persistance.Repositories
                 commandType: CommandType.StoredProcedure
             );
 
-            if (isSoftDeleteColumnHasRelatedChildTableColumn == true)
+            if (isSoftDeleteRecordHasRelatedChildTableColumn == true)
             {
                 foreach (var associatedType in typeof(TEntity).GetAssociatedTypes())
                 {

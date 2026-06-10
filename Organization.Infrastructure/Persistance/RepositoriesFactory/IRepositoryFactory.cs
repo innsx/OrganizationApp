@@ -5,8 +5,10 @@ namespace Organization.Application.Commons.Interfaces.Persistance.RepositoriesFa
 {
     public interface IRepositoryFactory
     {
-        // IGenericRepository interface leverages C# Generics to accept any type of entity,
-        // typically enforcing that TEntity must be a class
+
+        //In C#, where T : IDbEntity is a generic type constraint.
+        //It restricts the generic placeholder T so that it can only represent classes or structs
+        //that implement the IDbEntity interface
         IGenericRepository<TEntity> CreateRepository<TEntity>(DapperDataContext dapperDbContext) where TEntity : IDbEntity;
     }
 }

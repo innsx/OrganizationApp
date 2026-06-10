@@ -11,20 +11,19 @@ namespace Organization.Presentaion.API.Controllers
     public class CompaniesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        public IGenericRepository<Company> companyRepository;
+        private readonly IGenericRepository<Company> _companyRepository;
+
         public CompaniesController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            companyRepository = _unitOfWork.RepositoryFactory<Company>();
+            _companyRepository = _unitOfWork.RepositoryFactory<Company>();
         }
 
         [HttpGet]
         public async Task<IActionResult> GetCompanies()
         {
             //var companies = await _unitOfWork.Companies.GetAsync();
-
-            //var companyRepository = _unitOfWork.RepositoryFactory<Company>();
-            var companies = await companyRepository.GetAsync();
+            var companies = await _companyRepository.GetAsync();
 
             return Ok(companies);
         }
@@ -33,8 +32,7 @@ namespace Organization.Presentaion.API.Controllers
         public async Task<ActionResult<Company>> GetCompanyById(string id)
         {
             //var company = await _unitOfWork.Companies.GetByIdAsync(id);
-            //var companyRepository = _unitOfWork.RepositoryFactory<Company>();
-            var company = await companyRepository.GetAsync(id);
+            var company = await _companyRepository.GetByIdAsync(id);
 
             if (company == null)
             {
@@ -56,9 +54,7 @@ namespace Organization.Presentaion.API.Controllers
             //    Country = companyRequestDto.Country,
             //});
 
-            //var companyRepository = _unitOfWork.RepositoryFactory<Company>();
-
-            var newCompanyId = await companyRepository.AddAsnyc(new Company
+            var newCompanyId = await _companyRepository.AddAsnyc(new Company
             {
                 Name = companyRequestDto.Name,
                 Address = companyRequestDto.Address,
@@ -74,8 +70,7 @@ namespace Organization.Presentaion.API.Controllers
         public async Task<IActionResult> UpdateCompany(string id, [FromBody] CompanyRequestDto companyRequestDto)
         {
             //var companyToUpdate = await _unitOfWork.Companies.GetByIdAsync(id);
-            //var companyRepository = _unitOfWork.RepositoryFactory<Company>();
-            var companyToUpdate = await companyRepository.GetByIdAsync(id);
+            var companyToUpdate = await _companyRepository.GetByIdAsync(id);
 
             if (companyToUpdate == null)
             {
@@ -88,18 +83,17 @@ namespace Organization.Presentaion.API.Controllers
 
             _unitOfWork.OpenConnectionAndBeginTransaction();
             //await _unitOfWork.Companies.UpdateAsync(companyToUpdate);
-            await companyRepository.UpdateAsync(companyToUpdate);
+            await _companyRepository.UpdateAsync(companyToUpdate);
             _unitOfWork.CommitTransactionDisposeAndCloseConnectionDispose();
 
             return CreatedAtAction("GetCompanyById", new { id = id }, companyToUpdate);
         }
 
         [HttpDelete("{id:length(22)}")]
-        public async Task<IActionResult> DeleteCompany(string id, [FromBody] bool isSoftDeleteColumnHasAssociatedChildTableColumn)
+        public async Task<IActionResult> DeleteCompany(string id, [FromBody] bool isSoftDeleteRecordHasRelatedChildTableColumn = false)
         {
             //var companyToSoftDelete = await _unitOfWork.Companies.GetByIdAsync(id);
-            //var companyRepository = _unitOfWork.RepositoryFactory<Company>();
-            var companyToSoftDelete = await companyRepository.GetByIdAsync(id);
+            var companyToSoftDelete = await _companyRepository.GetByIdAsync(id);
 
             if (companyToSoftDelete == null)
             {
@@ -108,10 +102,10 @@ namespace Organization.Presentaion.API.Controllers
 
             _unitOfWork.OpenConnectionAndBeginTransaction();
             //await _unitOfWork.Companies.SoftDeleteAsync(id, isSoftDeleteColumnHasAssociatedChildTableColumn);
-            await companyRepository.SoftDeleteAsync(id, isSoftDeleteColumnHasAssociatedChildTableColumn);
+            await _companyRepository.SoftDeleteAsync(id, isSoftDeleteRecordHasRelatedChildTableColumn);
             _unitOfWork.CommitTransactionDisposeAndCloseConnectionDispose();
 
-            if (isSoftDeleteColumnHasAssociatedChildTableColumn == true)
+            if (isSoftDeleteRecordHasRelatedChildTableColumn == true)
             {
                 return Ok($"Company with Id: {id} is successfully Soft-Deleted in Parent Table column and Child Table column");
             }
