@@ -1,4 +1,7 @@
-﻿using Organization.Application.Commons.Interfaces.Persistance;
+﻿using Organization.Application.Commons.DTOs;
+using Organization.Application.Commons.Interfaces.Persistance;
+using Organization.Application.Commons.Utilities;
+using Organization.Domain.Employees;
 using Organization.Domain.Employees.Models;
 using Organization.Infrastructure.Persistance.DataContext;
 
@@ -9,5 +12,39 @@ namespace Organization.Infrastructure.Persistance.Repositories
         public EmployeeRepository(DapperDataContext dapperDataContext) : base(dapperDataContext)
         {
         }
+
+        public async Task<PageList<EmployeeResponseDto>> GetEmployeesByQueryAsync(EmployeeQueryParameters employeeQueryParameters)
+        {
+            //using pass-in EmployeeQueryParameters & specified needed columns that we SPECIFIED in DTO EmployeeResponse 
+            var employees = (await GetAsync(employeeQueryParameters, "Name", "Age", "Position", "Salary", "CreatedOn"))
+                                .AsQueryable()
+                                .Select(e => new EmployeeResponseDto  //manually converting EmployeeResponse object
+                                {
+                                    //mapping the PROPERTIES
+                                    Name = e.Name,
+                                    Age = e.Age,
+                                    Position = e.Position,
+                                    Salary = e.Salary,
+                                    CreatedOn = e.CreatedOn
+                                }); //in future, we will use MAPPester tool to AUTOMATIC converting an OBJECT into another OBJECT
+
+
+            //DEMO only: manually hard-coded employees total Counts = 200000000; from tblEmployee table
+            //OPTION: we can also do a CALL to "await GetTotalCountAsync();" to RETURN tblEmployee total counts,
+            //because of the 2 millions records, its RESOURCES INTESIVE, we do not wanted that
+            int employeesTotalCount = await GetTotalCountAsync();    //= 200000000;
+
+            //this line will get CALL every time 
+            //so this will create TRAFFICE Bottle-neck
+            //SOLUTION: we can request it ONLY ONCE and
+            //"CACHE" it and save the response in-memory,
+            //so we can ACCESS the return reponse from in-memory instead
+            //the PageList.cs STATIC Create( ) is REFERENCED
+            var pagedEmployees = PageList<EmployeeResponseDto>.Create(employees, employeeQueryParameters.PageNumber, employeeQueryParameters.PageSize, employeesTotalCount);
+
+            return pagedEmployees;
+
+        }
+
     }
 }

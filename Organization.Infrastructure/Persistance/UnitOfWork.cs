@@ -8,9 +8,9 @@ namespace Organization.Infrastructure.Persistance
 {
     public class UnitOfWork : IUnitOfWork
     {
-        //public ICompanyRepository Companies { get; private set; }
-        //public IEmployeeRepository Employees { get; private set;  }
-        private readonly IRepositoryFactory _repositoryFactory;
+        public ICompanyRepository Companies { get; private set; }
+        public IEmployeeRepository Employees { get; private set; }
+        //private readonly IRepositoryFactory _repositoryFactory;
 
         //specified boolean _isDisposed to 'false'
         public bool _isDisposed = false;
@@ -21,29 +21,32 @@ namespace Organization.Infrastructure.Persistance
             _dapperDataContext = dapperDataContext;
 
             // RepositoryFactory is injected
-            _repositoryFactory = repositoryFactory;
+            //_repositoryFactory = repositoryFactory;
 
-            //InitailizeRepositories();
+            InitailizeRepositories();
         }
 
-        //private void InitailizeRepositories()
-        //{
-        //    Companies = new CompanyRepository(_dapperDataContext);
-        //    Employees = new EmployeeRepository(_dapperDataContext);
-        //}
+        private void InitailizeRepositories()
+        {
+            Companies = new CompanyRepository(_dapperDataContext);
+            Employees = new EmployeeRepository(_dapperDataContext);
+        }
 
-        public void OpenConnectionAndBeginTransaction()
+        public void OpenConnectionAndBeginDbTransaction()
         {
             _dapperDataContext.Connection?.Open();
             _dapperDataContext.Transaction = _dapperDataContext.Connection?.BeginTransaction();
         }
 
-        public void CommitTransactionDisposeAndCloseConnectionDispose()
+        public void CommitDbTransactionDisposeAndCloseConnectionDispose()
         {
             _dapperDataContext.Transaction?.Commit();
             _dapperDataContext.Transaction?.Dispose();
 
-            //setting IDbTransaction 'Transaction' to Null will nullify it
+            //setting IDbTransaction 'Transaction' to Null
+            //When working with Entity Framework Core and Dapper together,
+            //you might set the transaction to null to prevent transaction leakage
+            //and avoid Object-Context state tracking errors.
             _dapperDataContext.Transaction = null;
 
             _dapperDataContext.Connection?.Close();
@@ -77,7 +80,7 @@ namespace Organization.Infrastructure.Persistance
             GC.SuppressFinalize(this);
         }
 
-        public void RollbackTransactionAndDispose()
+        public void RollbackDbTransactionAndDispose()
         {
             _dapperDataContext.Transaction?.Rollback();
             _dapperDataContext.Transaction?.Dispose();
@@ -88,15 +91,21 @@ namespace Organization.Infrastructure.Persistance
         //In C#, where T : IDbEntity is a generic type constraint.
         //It restricts the generic placeholder T so that it can only represent classes or structs
         //that implement the IDbEntity interface
-        public IGenericRepository<TEntity> RepositoryFactory<TEntity>() where TEntity : IDbEntity
-        {
-            return _repositoryFactory.CreateRepository<TEntity>(_dapperDataContext);
-        }
+        //public IGenericRepository<TEntity> RepositoryFactory<TEntity>() where TEntity : IDbEntity
+        //{
+        //    return _repositoryFactory.CreateRepository<TEntity>(_dapperDataContext);
+        //}
     }
 }
 
 
-
+/*
+ Dapper offers multiple overloaded methods where the IDbTransaction is an optional parameter. 
+Passing an invalid transaction object or keeping an unmanaged transaction scope open
+can cause Dapper to throw NullReferenceException or InvalidOperationException due to misrouted parameters. 
+Resetting to null forces Dapper to fall back to the safe, connection-level execution 
+(or whatever you explicitly feed it).
+ */
 
 
 //public void CommitTransaction()

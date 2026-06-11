@@ -38,11 +38,13 @@ namespace Organization.Infrastructure.Persistance.Repositories
             return newRecordId;
         }
 
-        public async Task<IEnumerable<TEntity>> GetAsync(params string[] selectedTableColumns)
+        public async Task<IEnumerable<TEntity>> GetAsync(QueryParameters queryParameters, params string[] selectedTableColumns)
         {
             var parameters = new DynamicParameters();
 
-            parameters.Add("tableName", typeof(TEntity).GetDbTableName(), DbType.String, ParameterDirection.Input);
+            parameters.Add("tableName", typeof(TEntity).GetDbTableName(), DbType.String, ParameterDirection.Input, size: 50);
+            parameters.Add("pageNumber", queryParameters.PageNumber, DbType.Int32, ParameterDirection.Input);
+            parameters.Add("pageSize", queryParameters.PageSize, DbType.Int32, ParameterDirection.Input);
 
             if (selectedTableColumns.Length > 0)
             {

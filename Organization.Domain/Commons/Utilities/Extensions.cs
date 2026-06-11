@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Formats.Tar;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -16,30 +17,34 @@ namespace Organization.Domain.Commons.Utilities
                 
         public static string GetDbTableColumnNames(this Type type, string[] selectedTableColumns)
         {
-            if (selectedTableColumns.Length < 1)
+            if (selectedTableColumns.Length == 0)
             {
-                return string.Join(",", type.GetProperties()
+                var tableColumnNames = string.Join(",", type.GetProperties()
                                                      .Select(p => p.GetDbColumnName())
                 )
                 .TrimEnd(',');
+
+                return tableColumnNames;
             }
             else
             {
-                return string.Join(",", type.GetProperties()
+                var tableColumnNamesWithInvariant = string.Join(",", type.GetProperties()
                                                      .Where(p => selectedTableColumns.ToLowerInvariant()
                                                                         .Contains(p.Name.ToLowerInvariant())
                                                      )
                                                      .Select(p => p.GetDbColumnName())
                 )
                 .TrimEnd(',');
+
+                return tableColumnNamesWithInvariant;
             }
         }
 
         public static string GetDbColumnName(this PropertyInfo propertyInfo)
         {
-            string columnNameAttribute = propertyInfo.GetCustomAttribute<ColumnNameAttribute>()?.NameValue ?? string.Empty;
+            string tableColumnName = propertyInfo.GetCustomAttribute<ColumnNameAttribute>()?.NameValue ?? string.Empty;
 
-            return columnNameAttribute;
+            return tableColumnName;
         }
 
         public static IEnumerable<string> ToLowerInvariant(this string[] sources)
@@ -53,21 +58,21 @@ namespace Organization.Domain.Commons.Utilities
 
         public static string GetColumnValuesForInsert<TEntity>(this Type type, TEntity entity)
         {
-            string columnValue = string.Join(",", 
+            string columnValues = string.Join(",", 
                                 type.GetColumnProperties()
                                     .Select(p => $"'{p.GetValue(entity)}'")
             );
 
-            return columnValue;
+            return columnValues;
         }
 
 
         public static IEnumerable<PropertyInfo> GetColumnProperties(this Type type)
         {
-            IEnumerable<PropertyInfo> propertyInfos = type.GetProperties()
+            IEnumerable<PropertyInfo> columnPropertyInfos = type.GetProperties()
                 .Where(p => p.GetCustomAttribute<NavigationAttribute>() is null);
 
-            return propertyInfos;
+            return columnPropertyInfos;
         }
 
         public static string GetColumnValuesForUpdate<TEntity>(this Type type, TEntity entity)
@@ -81,11 +86,11 @@ namespace Organization.Domain.Commons.Utilities
 
         public static IEnumerable<PropertyInfo> GetNonPrimaryColumnProperties(this Type type)
         {
-            IEnumerable<PropertyInfo> propertyInfos = type.GetProperties()
+            IEnumerable<PropertyInfo> columnPropertyInfos = type.GetProperties()
                                                         .Where(p => p.GetCustomAttribute<PrimaryKeyAttribute>() is null 
                                                         && p.GetCustomAttribute<NavigationAttribute>() is null);
 
-            return propertyInfos;
+            return columnPropertyInfos;
         }
 
         public static IEnumerable<AssociatedType> GetAssociatedTypes(this Type type)
@@ -103,9 +108,11 @@ namespace Organization.Domain.Commons.Utilities
 
         public static string GetDistinguishingUniqueKeyName(this Type type)
         {
-            return type.GetProperties()
+            string uniqueKeyName = type.GetProperties()
                         .Where(p => p.GetCustomAttribute<DistinguishingUniqueKeyAttribute>() is not null)
                         .FirstOrDefault()!.Name;
+
+            return uniqueKeyName;
         }
 
 
@@ -124,7 +131,9 @@ namespace Organization.Domain.Commons.Utilities
                                                                         Expression.Quote(lambdaExpression)
                                         );
 
-            return queryableItems.Provider.CreateQuery<IDbEntity>(methodCallExpression);
+            IQueryable<IDbEntity> iqueryableOfEntities = queryableItems.Provider.CreateQuery<IDbEntity>(methodCallExpression);
+
+            return iqueryableOfEntities;
         }
 
 

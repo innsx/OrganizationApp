@@ -25,12 +25,16 @@ namespace Organization.Domain.Employees.Models
         public string? CompanyId { get; set; }
 
         [ColumnName("CreatedOn")]
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
 
         [ColumnName("ModifiedOn")]
-        public DateTime ModifiedOn { get; set; }
+        public DateTime ModifiedOn { get; set; } = DateTime.Now;
 
         [ColumnName("Salary")]
         public Decimal Salary { get; set; }
+
+        [ColumnName("IsDeleted")]
+        public bool IsDeleted { get; set; }
+
     }
 }
