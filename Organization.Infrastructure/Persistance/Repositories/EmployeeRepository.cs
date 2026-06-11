@@ -34,13 +34,26 @@ namespace Organization.Infrastructure.Persistance.Repositories
             //because of the 2 millions records, its RESOURCES INTESIVE, we do not wanted that
             int employeesTotalCount = await GetTotalCountAsync();    //= 200000000;
 
+
+            // we check if EmployeeQueryParameters Name Property is NOT NULL or EMPTY
+            if (!string.IsNullOrEmpty(employeeQueryParameters.Name))
+            {
+                //NOT EMPTY, then Filter the returning Employees by Name
+                employees = employees.Where(e => e.Name!.ToLowerInvariant()
+                                                        .Contains(employeeQueryParameters.Name.ToLowerInvariant())
+                                           );
+            }
+
             //this line will get CALL every time 
             //so this will create TRAFFICE Bottle-neck
             //SOLUTION: we can request it ONLY ONCE and
             //"CACHE" it and save the response in-memory,
             //so we can ACCESS the return reponse from in-memory instead
             //the PageList.cs STATIC Create( ) is REFERENCED
-            var pagedEmployees = PageList<EmployeeResponseDto>.Create(employees, employeeQueryParameters.PageNumber, employeeQueryParameters.PageSize, employeesTotalCount);
+            var pagedEmployees = PageList<EmployeeResponseDto>.Create(employees, 
+                                                                    employeeQueryParameters.PageNumber, 
+                                                                    employeeQueryParameters.PageSize, 
+                                                                    employeesTotalCount);
 
             return pagedEmployees;
 
