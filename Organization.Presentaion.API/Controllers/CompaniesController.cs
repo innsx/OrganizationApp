@@ -23,7 +23,7 @@ namespace Organization.Presentaion.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyQueryParameters companyQueryParameters)
         {
-            var companies = await _unitOfWork.Companies.GetAsync(companyQueryParameters);
+            var companies = await _unitOfWork.Companies.GetCompaniesByQueryAsync(companyQueryParameters);
             //var companies = await companyRepository.GetAsync(companyQueryParameters);
 
             return Ok(companies);

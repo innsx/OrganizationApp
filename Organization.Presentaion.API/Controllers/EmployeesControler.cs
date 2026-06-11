@@ -80,6 +80,7 @@ namespace Organization.Presentaion.API.Controllers
                 employeeToUpdate.Position = employeeRequest.Position;
                 employeeToUpdate.Salary = employeeRequest.Salary;
                 employeeToUpdate.CompanyId = employeeRequest.CompanyId;
+                employeeToUpdate.ModifiedOn = DateTime.Now;
             }
 
             _unitOfWork.OpenConnectionAndBeginDbTransaction();
@@ -88,7 +89,7 @@ namespace Organization.Presentaion.API.Controllers
 
             _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
 
-            return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id = id }, employeeRequest));
+            return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id = id }, employeeToUpdate));
         }
 
         [HttpDelete("{id:length(22)}")]

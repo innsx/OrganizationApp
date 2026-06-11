@@ -11,5 +11,6 @@
         public Decimal Salary { get; set; }
 
         public string? CompanyId {get; set;}
+
     }
 }

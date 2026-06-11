@@ -115,7 +115,8 @@ namespace Organization.Domain.Commons.Utilities
             return uniqueKeyName;
         }
 
-
+        //using REFLECTION
+        //SortOrder will reference OrderByCustom( ) to sort the Employees based of the Specified sorting column
         public static IQueryable<IDbEntity> OrderByCustom<IDbEntity>(this IQueryable<IDbEntity> queryableItems, string sortBy, string sortOrder)
         {
             Type entity = typeof(IDbEntity);

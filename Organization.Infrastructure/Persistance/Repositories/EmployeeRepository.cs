@@ -1,6 +1,7 @@
 ﻿using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
+using Organization.Domain.Commons.Utilities;
 using Organization.Domain.Employees;
 using Organization.Domain.Employees.Models;
 using Organization.Infrastructure.Persistance.DataContext;
@@ -25,7 +26,9 @@ namespace Organization.Infrastructure.Persistance.Repositories
                                     Age = e.Age,
                                     Position = e.Position,
                                     Salary = e.Salary,
-                                    CreatedOn = e.CreatedOn
+                                    CreatedOn = e.CreatedOn,
+                                    ModifiedOn = e.ModifiedOn,
+                                    IsDeleted = e.IsDeleted
                                 }); //in future, we will use MAPPester tool to AUTOMATIC converting an OBJECT into another OBJECT
 
 
@@ -35,13 +38,31 @@ namespace Organization.Infrastructure.Persistance.Repositories
             int employeesTotalCount = await GetTotalCountAsync();    //= 200000000;
 
 
-            // we check if EmployeeQueryParameters Name Property is NOT NULL or EMPTY
-            if (!string.IsNullOrEmpty(employeeQueryParameters.Name))
+            // we check if EmployeeQueryParameters FilterBy Property is NOT NULL or EMPTY
+            if (!string.IsNullOrEmpty(employeeQueryParameters.FilterBy))
             {
+
                 //NOT EMPTY, then Filter the returning Employees by Name
                 employees = employees.Where(e => e.Name!.ToLowerInvariant()
-                                                        .Contains(employeeQueryParameters.Name.ToLowerInvariant())
+                                                        .Contains(employeeQueryParameters.FilterBy.ToLowerInvariant())
+                                              || e.Position!.ToLowerInvariant()
+                                                        .Contains(employeeQueryParameters.FilterBy.ToLowerInvariant())
+                                           
                                            );
+
+                //string targetProperty = "Age";
+                //employees = employees.Where(e => (int)e.GetType().GetProperty(targetProperty).GetValue(e)) == employeeQueryParameters.FilterBy;
+
+            }
+
+
+            if (!string.IsNullOrEmpty(employeeQueryParameters.SortBy))
+            {
+                if (typeof(Employee).GetProperty(employeeQueryParameters.SortBy) is not null)
+                {
+                    employees = employees.OrderByCustom(employeeQueryParameters.SortBy,
+                                                        employeeQueryParameters.SortOrder);
+                }
             }
 
             //this line will get CALL every time 
