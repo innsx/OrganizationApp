@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Organization.Application.Configurations;
 using Organization.Infrastructure.Configuration;
 using Organization.Presentaion.API.Configurations;
@@ -18,11 +19,25 @@ builder.Services
 
 var app = builder.Build();
 
+//we needed to Get a SERVICE of the TYPE IApiVersionDescriptionProvider
+var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    // commented this line so we can specifies a Swagger with options
+    //app.UseSwaggerUI();  
+
+    //adding more Swagger UI Options
+    app.UseSwaggerUI(c =>
+    {
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+        }
+    });
+
 }
 
 app.UseHttpsRedirection();

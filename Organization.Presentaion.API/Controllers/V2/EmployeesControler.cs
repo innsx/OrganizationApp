@@ -5,9 +5,11 @@ using Organization.Domain.Company.Models;
 using Organization.Domain.Employees;
 using Organization.Domain.Employees.Models;
 
-namespace Organization.Presentaion.API.Controllers
+namespace Organization.Presentaion.API.Controllers.V2
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]   //setup for Query String or HEADER API Versioning
+    [Route("api/v{v:apiVersion}/[controller]")] //setup for URI API Versioning
+    [ApiVersion("2.0")]  //specified version
     [ApiController]
     public class EmployeesController : ControllerBase
     {
@@ -93,7 +95,7 @@ namespace Organization.Presentaion.API.Controllers
 
             _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
 
-            return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id = id }, employeeToUpdate));
+            return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id }, employeeToUpdate));
         }
 
         [HttpDelete("{id:length(22)}")]

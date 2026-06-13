@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Domain.Company;
 using Organization.Domain.Company.Models;
-using Organization.Domain.Employees.Models;
 
-namespace Organization.Presentaion.API.Controllers
+namespace Organization.Presentaion.API.Controllers.V2
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]  //setup for Query String or HEADER API Versioning
+    [Route("api/v{v:apiVersion}/[controller]")] //setup for URI API Versioning
+    [ApiVersion("2.0")]  //specified version
     [ApiController]
     public class CompaniesController : ControllerBase
     {
@@ -91,7 +91,7 @@ namespace Organization.Presentaion.API.Controllers
             //await companyRepository.UpdateAsync(companyToUpdate);
             _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
 
-            return CreatedAtAction("GetCompanyById", new { id = id }, companyToUpdate);
+            return CreatedAtAction("GetCompanyById", new { id }, companyToUpdate);
         }
 
         [HttpDelete("{id:length(22)}")]
@@ -119,6 +119,15 @@ namespace Organization.Presentaion.API.Controllers
                 return Ok($"Company with Id: {id} is successfully Soft-Deleted in Parent Table column");
 
             }
+        }
+
+
+        [HttpGet("count")]
+        public async Task<IActionResult> GetCount()
+        {
+            var count = await _unitOfWork.Companies.GetTotalCountAsync();
+
+            return Ok(count);
         }
     }
 }
