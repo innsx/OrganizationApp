@@ -17,7 +17,7 @@ namespace Organization.Infrastructure.Persistance.Repositories
         public async Task<PageList<EmployeeResponseDto>> GetEmployeesByQueryAsync(EmployeeQueryParameters employeeQueryParameters)
         {
             //using pass-in EmployeeQueryParameters & specified needed columns that we SPECIFIED in DTO EmployeeResponse 
-            var employees = (await GetAsync(employeeQueryParameters, "Name", "Age", "Position", "Salary", "CreatedOn"))
+            var employees = (await GetAsync(employeeQueryParameters, "Name", "Age", "Position", "Salary"))
                                 .AsQueryable()
                                 .Select(e => new EmployeeResponseDto  //manually converting EmployeeResponse object
                                 {
@@ -26,9 +26,6 @@ namespace Organization.Infrastructure.Persistance.Repositories
                                     Age = e.Age,
                                     Position = e.Position,
                                     Salary = e.Salary,
-                                    CreatedOn = e.CreatedOn,
-                                    ModifiedOn = e.ModifiedOn,
-                                    IsDeleted = e.IsDeleted
                                 }); //in future, we will use MAPPester tool to AUTOMATIC converting an OBJECT into another OBJECT
 
 
