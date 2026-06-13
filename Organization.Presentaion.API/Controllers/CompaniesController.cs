@@ -4,6 +4,7 @@ using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Domain.Company;
 using Organization.Domain.Company.Models;
+using Organization.Domain.Employees.Models;
 
 namespace Organization.Presentaion.API.Controllers
 {
@@ -32,8 +33,10 @@ namespace Organization.Presentaion.API.Controllers
         [HttpGet("{id:length(22)}")]
         public async Task<ActionResult<Company>> GetCompanyById(string id)
         {
-            var company = await _unitOfWork.Companies.GetByIdAsync(id);
-            //var company = await companyRepository.GetByIdAsync(id);
+            //var company = await _unitOfWork.Companies.GetByIdAsync(id);
+            //var company = await companyRepository.QueryOneToManyParentChildRelationshipAsync(id);
+
+            var company = await _unitOfWork.Companies.QueryOneToManyParentChildRelationshipAsync(id);
 
             if (company == null)
             {
@@ -42,6 +45,7 @@ namespace Organization.Presentaion.API.Controllers
 
             return Ok(company);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> AddCompany([FromBody] CompanyRequestDto companyRequestDto)

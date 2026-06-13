@@ -8,5 +8,8 @@ namespace Organization.Application.Commons.Interfaces.Persistance
     public interface ICompanyRepository : IGenericRepository<Company>
     {
         public Task<PageList<CompanyResponseDto>> GetCompaniesByQueryAsync(CompanyQueryParameters companyqueryParameters);
+
+
+        Task<ICollection<Company>> QueryOneToManyParentChildRelationshipAsync(string guid);
     }
 }

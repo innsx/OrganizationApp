@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
+using Organization.Domain.Company.Models;
 using Organization.Domain.Employees;
 using Organization.Domain.Employees.Models;
 
@@ -28,9 +29,12 @@ namespace Organization.Presentaion.API.Controllers
         [HttpGet("{id:length(22)}")]
         public async Task<IActionResult> GetEmployeeById(string id)
         {
+            //var employee = await _unitOfWork.Employees.GetByIdAsync(id);
             var employee = await _unitOfWork.Employees.GetByIdAsync(id);
+ 
             return Ok(employee);
         }
+
 
         [HttpPost("employee")]
         public async Task<IActionResult> AddEmployee([FromBody] EmployeeRequestDto employeeRequest)

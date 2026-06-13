@@ -84,8 +84,8 @@ namespace Organization.Infrastructure.Persistance.Repositories
             {
                 // QuerySingleOrDefaultAsync returns zero or one row of an instance of the type specified by the TEntity type parameter or null
                 var record = await connection!.QuerySingleOrDefaultAsync<TEntity>(
-                    "uspGetRecordsById", 
-                    parameters, 
+                    "uspGetRecordsById",
+                    parameters,
                     commandType: CommandType.StoredProcedure
                 );
 
@@ -203,3 +203,107 @@ namespace Organization.Infrastructure.Persistance.Repositories
         //ExecuteScalarAsync	Returns the first column of the first row as a dynamic type asynchronously
     }
 }
+
+
+
+
+
+
+//public async Task<Company> QueryJoinTablesAsync(string guid)
+//{
+
+//    var sql = @"
+//                    SELECT * FROM tblCompanies WHERE Id = @Id;";
+
+//    var sql1 = @"SELECT * FROM tblEmployees WHERE CompanyId = @Id;";
+
+//    using var multi = await _dapperDataContext.Connection!.QueryMultipleAsync(sql + sql1, new { @Id = guid });
+
+//    var company = await multi.ReadSingleOrDefaultAsync<Company>();
+
+//    if (company != null)
+//    {
+//        var employees = await multi.ReadAsync<Employee>();
+//        company.Employees = employees.ToList();
+//    }
+
+//    return company;
+
+//}
+
+
+
+
+//public async Task<IEnumerable<TEntity>> QueryJoinTablesAsync(string guid)
+//{
+
+//     string sql = $@" select *
+//                              From tblCompanies c
+//                              inner join tblEmployees e
+//                              on c.Id = e.CompanyId
+//                              where c.Id = ";
+
+//    var query = sql + guid;
+
+//    using (var connection = _dapperDataContext.Connection)
+//    {
+//        var company = await connection!.QueryAsync<Company, Employee, Company>(
+//        sql,
+//        map: (company, employee) =>
+//        {
+//            company.Employees = employee;
+//            return company;
+//        },
+//        splitOn: "Id" // Tells Dapper where the Customer data starts
+//        );
+
+//        return company.ToList();
+//    }
+
+//}
+
+
+
+
+//public async Task<TEntity> GetByIdAsync(string guid, params string[] selectData)
+//{
+//    const string sql = $@" select *
+//                          From tblCompanies c
+//                          inner join tblEmployees e
+//                          on c.Id = e.CompanyId
+//                          where c.Id = ";
+
+//    var query = sql + guid;
+
+//    // Dictionary tracks parent entries to avoid duplicates
+//    var companiesDictionary = new Dictionary<string, Company>();
+
+//    using (var connection = _dapperDataContext.Connection)
+//    {
+//        // QuerySingleOrDefaultAsync returns zero or one row of an instance of the type specified by the TEntity type parameter or null
+//        var record = await connection!.QueryAsync<Company, Employee, Company>(
+//                    query,
+//                    (Company, Employee) =>
+//                    {
+//                        // If order isn't in cache, add it
+//                        if (!companiesDictionary.TryGetValue(Company.Id, out var existingCompany))
+//                        {
+//                            existingCompany = Company;
+//                            companiesDictionary.Add(existingCompany.Id, existingCompany);
+//                        }
+
+//                        // Append child item to parent's list
+//                        if (Employee != null)
+//                        {
+//                            existingCompany.Employees.Append(Employee);
+//                        }
+
+//                        return existingCompany;
+//                    },
+//                    splitOn: "Id" // Splits at LineItems 'Id' column
+//        );
+
+//        // Return unique root Company elements
+//        return  companiesDictionary.Values;
+//    }
+//}

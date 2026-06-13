@@ -29,6 +29,6 @@ namespace Organization.Domain.Company.Models
 
 
         [Navigation(typeof(Employee), "CompanyId")]
-        public IEnumerable<Employee> Employees { get; set; } = new List<Employee>();
+        public ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }
 }

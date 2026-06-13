@@ -6,13 +6,19 @@ using Organization.Domain.Company;
 using Organization.Domain.Company.Models;
 using Organization.Domain.Employees.Models;
 using Organization.Infrastructure.Persistance.DataContext;
+using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using static Dapper.SqlMapper;
 
 namespace Organization.Infrastructure.Persistance.Repositories
 {
     public sealed class CompanyRepository : GenericRepository<Company>, ICompanyRepository
-    {        
+    {
+        private readonly DapperDataContext _dapperDataContext;
         public CompanyRepository(DapperDataContext dapperDataContext) : base(dapperDataContext)
         {
+            _dapperDataContext = dapperDataContext;
         }
 
         public async Task<PageList<CompanyResponseDto>> GetCompaniesByQueryAsync(CompanyQueryParameters companyQueryParameters)
@@ -40,6 +46,10 @@ namespace Organization.Infrastructure.Persistance.Repositories
                 //NOT EMPTY, then Filter the returning Employees by Name
                 companies = companies.Where(e => e.Name!.ToLowerInvariant()
                                                         .Contains(companyQueryParameters.FilterBy.ToLowerInvariant())
+                                               || e.Address!.ToLowerInvariant()
+                                                        .Contains(companyQueryParameters.FilterBy.ToLowerInvariant())
+                                               || e.Country!.ToLowerInvariant()
+                                                        .Contains(companyQueryParameters.FilterBy.ToLowerInvariant())
                                            );
             }
 
@@ -58,13 +68,113 @@ namespace Organization.Infrastructure.Persistance.Repositories
             //"CACHE" it and save the response in-memory,
             //so we can ACCESS the return reponse from in-memory instead
             //the PageList.cs STATIC Create( ) is REFERENCED 
-            var pagedCompany = PageList<CompanyResponseDto>.Create(companies, 
-                                                                    companyQueryParameters.PageNumber, 
-                                                                    companyQueryParameters.PageSize, 
+            var pagedCompany = PageList<CompanyResponseDto>.Create(companies,
+                                                                    companyQueryParameters.PageNumber,
+                                                                    companyQueryParameters.PageSize,
                                                                     companyTotalCount);
 
             return pagedCompany;
 
         }
+
+
+        //https://www.youtube.com/watch?v=rpBmUqrDH8M
+        public async Task<ICollection<Company>> QueryOneToManyParentChildRelationshipAsync(string guid)
+        {
+
+            string sql = @$" select *
+                                      From tblCompanies c
+                                      inner join tblEmployees e
+                                      on c.Id = e.CompanyId
+                                      where c.Id = '{guid}'";
+
+            // Dictionary tracks parents we've already created/seen
+            var companyDictionary = new Dictionary<string, Company>();
+
+            using var connection = _dapperDataContext.Connection;
+
+
+            IEnumerable<Company> companies = await connection!.QueryAsync<Company, Employee, Company>(
+                 sql,
+                (company, employee) =>
+                {
+                    // 1. Check if the parent company is already in our dictionary
+                    if (!companyDictionary.TryGetValue(company.Id, out var currentCompany))
+                    {
+                        currentCompany = company;
+                        currentCompany.Employees = new List<Employee>();
+                        companyDictionary.Add(company.Id, currentCompany);
+                    }
+
+                    // 2. Add the related child to the parent's collection
+                    if (employee.Id != null)
+                    {
+                        currentCompany.Employees.Add(employee);
+                    }
+
+                    return currentCompany;
+                },
+
+                // Adjust if your child table's primary key has a different name as a Primary Key
+                splitOn: "Id"
+
+                );
+
+            // Return the distinct parent record
+            return companyDictionary.Values.ToArray();
+        }
+
     }
 }
+
+
+
+
+//public async Task<IEnumerable<Company>> QueryJoinTablesAsync(string guid)
+//{
+
+//    string sql = @" select *
+//                     From tblCompanies c
+//                     select *
+//                     from tblEmployees e
+//                     ";
+
+//    using var connection = _dapperDataContext.Connection;
+
+//    using (var multi = await connection.QueryMultipleAsync(sql))
+//    {
+//        // Read the tables sequentially in the order they are queried
+//        var companies = (await multi.ReadAsync<Company>()).ToList();
+//        var employees = (await multi.ReadAsync<Employee>()).ToList();
+
+//        // Map the relationships manually in C# memory
+//        foreach (var company in companies)
+//        {
+//            company.Employees = employees.Where(l => l.CompanyId == company.Id).ToList();
+//        }
+//    }
+//}
+
+
+
+//public async Task<Company> QueryJoinTablesAsync(string guid)
+//{
+
+//    var sql = @"
+//                    SELECT * FROM tblCompanies WHERE Id = @Id;";
+
+//    var sql1 = @"SELECT * FROM tblEmployees WHERE CompanyId = @Id;";
+
+//    using var multi = await _dapperDataContext.Connection!.QueryMultipleAsync(sql + sql1, new { @Id = guid });
+
+//    var company = await multi.ReadSingleOrDefaultAsync<Company>();
+
+//    if (company != null)
+//    {
+//        var employees = await multi.ReadAsync<Employee>();
+//        company.Employees = employees.ToList();
+//    }
+
+//    return company;
+
+//}
