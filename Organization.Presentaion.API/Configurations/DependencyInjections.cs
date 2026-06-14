@@ -7,6 +7,7 @@ using Organization.Infrastructure.Persistance;
 using Organization.Infrastructure.Persistance.RepositoriesFactory;
 using Organization.Presentaion.API.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
 
 namespace Organization.Presentaion.API.Configurations
 {
@@ -18,7 +19,18 @@ namespace Organization.Presentaion.API.Configurations
 
             services.AddEndpointsApiExplorer();
 
-            services.AddSwaggerGen();
+            //Commmented this line
+            //services.AddSwaggerGen();
+
+            //add these lines to document in XML format
+            services.AddSwaggerGen(options =>
+            {
+                //& PROVIDES & SPECIFY the PATH to our XML file in the location of our Organisation Project:
+                //D:\Repos\OrgAppZero2Prod\OrganisationApp\Organisation.Presentation.API\bin\Debug\net7.0
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+
+            });
+
 
             services.AddScoped<IRepositoryFactory, RepositoryFactory>();
 
