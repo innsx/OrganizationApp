@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Organization.Application.Configurations;
 using Organization.Infrastructure.Configuration;
 using Organization.Presentaion.API.Configurations;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,13 @@ if (app.Environment.IsDevelopment())
         foreach (var description in provider.ApiVersionDescriptions)
         {
             c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+
+            //c.RoutePrefix = "api/documentation"; //Adds a PREFIX to SWAGGER's ROUTE
+            c.DefaultModelExpandDepth(2);
+            c.DocExpansion(DocExpansion.List);  //List: lists & expands ALL ENDPOINT (is the DEFAULT)  when loaded
+            //c.DocExpansion(DocExpansion.Full);  //Full: expands ALL ENDPOINT (is the DEFAULT)  when loaded
+            //c.DocExpansion(DocExpansion.None);    //None: will not expand the ENDPOINTS when loaded
+            c.DisplayRequestDuration();
         }
     });
 

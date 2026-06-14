@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
+using Organization.Application.Commons.Utilities;
 using Organization.Domain.Company.Models;
 using Organization.Domain.Employees;
 using Organization.Domain.Employees.Models;
@@ -20,6 +21,12 @@ namespace Organization.Presentaion.API.Controllers.V2
             _unitOfWork = unitOfWork;
         }
 
+
+        /// <summary>
+        /// This endpoint gets all the Employees in the system.
+        /// </summary>
+        /// <respone code="200">Returns paged list of all Employees in the system</respone>
+        [ProducesResponseType(typeof(PageList<EmployeeResponseDto>), 200)]
         [HttpGet]
         public async Task<IActionResult> GetEmployees([FromQuery] EmployeeQueryParameters employeeQueryParameters)
         {
@@ -27,21 +34,31 @@ namespace Organization.Presentaion.API.Controllers.V2
             return Ok(employees);
         }
 
-
+        /// <summary>
+        /// This endpoint gets a particular Employee from the system based on the provided Employee id.
+        /// </summary>
+        /// <param name="id">**string**</param>
+        /// <response code="200">Gets a Employee successfully.</response>
+        /// <response code="404">Could not find the Employee.</response>
+        /// <returns>Company</returns>
         [HttpGet("{id:length(22)}")]
         public async Task<IActionResult> GetEmployeeById(string id)
         {
             //var employee = await _unitOfWork.Employees.GetByIdAsync(id);
             var employee = await _unitOfWork.Employees.GetByIdAsync(id);
- 
+
             return Ok(employee);
         }
 
-
+        /// <summary>
+        /// This endpoint adds an Employee in the system.
+        /// </summary>
+        /// <param name="employeeRequestDto">**CreateEmployeeRequest**</param>
+        /// <response code="201">Adds an Employee successfullly</response>
         [HttpPost("employee")]
-        public async Task<IActionResult> AddEmployee([FromBody] EmployeeRequestDto employeeRequest)
+        public async Task<IActionResult> AddEmployee([FromBody] EmployeeRequestDto employeeRequestDto)
         {
-            if (employeeRequest == null)
+            if (employeeRequestDto == null)
             {
                 return BadRequest();
             }
@@ -51,41 +68,48 @@ namespace Organization.Presentaion.API.Controllers.V2
             string employeeId = await _unitOfWork.Employees.AddAsnyc(
                 new Employee     //creating a new Company object & INITIALIZING Company PROPERTIES
                 {
-                    Name = employeeRequest.Name,
-                    Age = employeeRequest.Age,
-                    Position = employeeRequest.Position,
-                    Salary = employeeRequest.Salary,
-                    CompanyId = employeeRequest.CompanyId,
+                    Name = employeeRequestDto.Name,
+                    Age = employeeRequestDto.Age,
+                    Position = employeeRequestDto.Position,
+                    Salary = employeeRequestDto.Salary,
+                    CompanyId = employeeRequestDto.CompanyId,
                 }
             );
 
             _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
 
-            return Ok(CreatedAtAction(nameof(GetEmployeeById), new {id = employeeId}, employeeRequest));
+            return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id = employeeId }, employeeRequestDto));
         }
 
+
+        /// <summary>
+        /// This endpoint updates a Employee in the system.
+        /// </summary>
+        /// <param name="id">**string**</param>
+        /// <param name="employeeRequestDto">**EmployeeResponse**</param>
+        /// <response code="201">Updates a Employee successfullly</response>
         [HttpPut("{id:length(22)}")]
-        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] EmployeeRequestDto employeeRequest)
+        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] EmployeeRequestDto employeeRequestDto)
         {
             if (id == null)
             {
                 return BadRequest();
             }
 
-            if (employeeRequest == null)
+            if (employeeRequestDto == null)
             {
-                return NotFound(employeeRequest);
+                return NotFound(employeeRequestDto);
             }
 
             var employeeToUpdate = await _unitOfWork.Employees.GetByIdAsync(id);
 
             if (employeeToUpdate != null)
             {
-                employeeToUpdate.Name = employeeRequest.Name;
-                employeeToUpdate.Age = employeeRequest.Age;
-                employeeToUpdate.Position = employeeRequest.Position;
-                employeeToUpdate.Salary = employeeRequest.Salary;
-                employeeToUpdate.CompanyId = employeeRequest.CompanyId;
+                employeeToUpdate.Name = employeeRequestDto.Name;
+                employeeToUpdate.Age = employeeRequestDto.Age;
+                employeeToUpdate.Position = employeeRequestDto.Position;
+                employeeToUpdate.Salary = employeeRequestDto.Salary;
+                employeeToUpdate.CompanyId = employeeRequestDto.CompanyId;
                 employeeToUpdate.ModifiedOn = DateTime.Now;
             }
 
@@ -98,6 +122,13 @@ namespace Organization.Presentaion.API.Controllers.V2
             return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id }, employeeToUpdate));
         }
 
+
+        /// <summary>
+        /// This endpoint SoftDeletes of an Employee in the system.
+        /// </summary>
+        /// <param name="id">**string**</param>
+        /// <param name="isSoftDeleteRecordHasRelatedChildTableColumn">**Boolean**</param>
+        /// <response code="201">SoftDeletes an Employee successfullly</response>
         [HttpDelete("{id:length(22)}")]
         public async Task<IActionResult> DeleteEmployee(string id, [FromBody] bool isSoftDeleteRecordHasRelatedChildTableColumn = false)
         {
@@ -123,4 +154,5 @@ namespace Organization.Presentaion.API.Controllers.V2
         }
     }
 }
+
 

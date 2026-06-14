@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
+using Organization.Application.Commons.Utilities;
 using Organization.Domain.Company;
 using Organization.Domain.Company.Models;
 
 namespace Organization.Presentaion.API.Controllers.V2
 {
-    //[Route("api/[controller]")]  //setup for Query String or HEADER API Versioning
+    //[Route("api/[controller]")]   //setup for Query String or HEADER API Versioning
     [Route("api/v{v:apiVersion}/[controller]")] //setup for URI API Versioning
     [ApiVersion("2.0")]  //specified version
     [ApiController]
+    [Produces("application/json")]
     public class CompaniesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -21,6 +23,11 @@ namespace Organization.Presentaion.API.Controllers.V2
             //companyRepository = _unitOfWork.RepositoryFactory<Company>();
         }
 
+        /// <summary>
+        /// This endpoint gets all the companies in the system.
+        /// </summary>
+        /// <respone code="200">Returns paged list of all companies in the system</respone>
+        [ProducesResponseType(typeof(PageList<CompanyResponseDto>), 200)]
         [HttpGet]
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyQueryParameters companyQueryParameters)
         {
@@ -30,6 +37,13 @@ namespace Organization.Presentaion.API.Controllers.V2
             return Ok(companies);
         }
 
+        /// <summary>
+        /// This endpoint gets a particular company table based of this {id}.
+        /// </summary>
+        /// <param name="id">**string**</param>
+        /// <response code="200">Gets a comapny successfully.</response>
+        /// <response code="404">Could not find the company.</response>
+        /// <returns>Company</returns>
         [HttpGet("{id:length(22)}")]
         public async Task<ActionResult<Company>> GetCompanyById(string id)
         {
@@ -47,6 +61,11 @@ namespace Organization.Presentaion.API.Controllers.V2
         }
 
 
+        /// <summary>
+        /// This endpoint adds a company in the system.
+        /// </summary>
+        /// <param name="companyRequestDto">**companyRequestDto**</param>
+        /// <response code="201">Adds a company successfullly</response>
         [HttpPost]
         public async Task<IActionResult> AddCompany([FromBody] CompanyRequestDto companyRequestDto)
         {
@@ -71,6 +90,12 @@ namespace Organization.Presentaion.API.Controllers.V2
             return CreatedAtAction(nameof(GetCompanyById), new { id = newCompanyId }, companyRequestDto);
         }
 
+        /// <summary>
+        /// This endpoint updates a company in the system.
+        /// </summary>
+        /// <param name="id">**string**</param>
+        /// <param name="companyRequestDto">**companyRequestDto**</param>
+        /// <response code="201">Updates a company successfullly</response>
         [HttpPut("{id:length(22)}")]
         public async Task<IActionResult> UpdateCompany(string id, [FromBody] CompanyRequestDto companyRequestDto)
         {
@@ -94,6 +119,13 @@ namespace Organization.Presentaion.API.Controllers.V2
             return CreatedAtAction("GetCompanyById", new { id }, companyToUpdate);
         }
 
+
+        /// <summary>
+        /// This endpoint SoftDeletes a company in the system.
+        /// </summary>
+        /// <param name="id">**string**</param>
+        /// <param name="isSoftDeleteRecordHasRelatedChildTableColumn">**CompanyRequest**</param>
+        /// <response code="201">SoftDeletes a company successfullly</response>
         [HttpDelete("{id:length(22)}")]
         public async Task<IActionResult> DeleteCompany(string id, [FromBody] bool isSoftDeleteRecordHasRelatedChildTableColumn = false)
         {
@@ -121,7 +153,7 @@ namespace Organization.Presentaion.API.Controllers.V2
             }
         }
 
-
+    
         [HttpGet("count")]
         public async Task<IActionResult> GetCount()
         {
