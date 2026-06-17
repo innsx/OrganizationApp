@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Options;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Interfaces.Persistance.RepositoriesFactory;
 using Organization.Infrastructure.Persistance;
 using Organization.Infrastructure.Persistance.RepositoriesFactory;
+using Organization.Presentaion.API.Common.Exceptions;
 using Organization.Presentaion.API.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
@@ -71,8 +73,11 @@ namespace Organization.Presentaion.API.Configurations
             //we MUST INJECT "<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>()"
             services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
-
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            //REGISTERING CustomProblemDetailsFactory with injecting System's ProblemDetailsFactory class
+            services.AddSingleton<ProblemDetailsFactory, CustomProblemDetailsFactory>();
+
 
             return services;
         }

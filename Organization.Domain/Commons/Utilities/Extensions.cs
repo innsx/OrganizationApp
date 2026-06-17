@@ -106,10 +106,10 @@ namespace Organization.Domain.Commons.Utilities
             }
         }
 
-        public static string GetDistinguishingUniqueKeyName(this Type type)
+        public static string GetDistinctUniqueKeyName(this Type type)
         {
             string uniqueKeyName = type.GetProperties()
-                        .Where(p => p.GetCustomAttribute<DistinguishingUniqueKeyAttribute>() is not null)
+                        .Where(p => p.GetCustomAttribute<DistinctUniqueKeyAttribute>() is not null)
                         .FirstOrDefault()!.Name;
 
             return uniqueKeyName;

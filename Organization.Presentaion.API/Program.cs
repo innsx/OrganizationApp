@@ -48,6 +48,12 @@ if (app.Environment.IsDevelopment())
 
 }
 
+// we will add this line as a middleware PIPELINE
+// & every time an ERROR occurred,  
+// ErrorController.cs Class’s Error( ) Endpoint will get HITTED
+// & the Error( ) will catch ALL EXCEPTIONS & LOGGED THOSE EXCEPTIONS
+app.UseExceptionHandler("/Error");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

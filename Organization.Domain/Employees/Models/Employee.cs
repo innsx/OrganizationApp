@@ -10,7 +10,7 @@ namespace Organization.Domain.Employees.Models
         [ColumnName("Id")]
         public string Id { get; set; } = ShortGuid.NewGuid();
 
-        [DistinguishingUniqueKey]
+        [DistinctUniqueKey]
         [ColumnName("Name")]
         public string? Name { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.DTOs;
+using Organization.Application.Commons.Exceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
 using Organization.Domain.Company.Models;
@@ -46,7 +47,16 @@ namespace Organization.Presentaion.API.Controllers.V1
         {
             //var employee = await _unitOfWork.Employees.GetByIdAsync(id);
             var employee = await _unitOfWork.Employees.GetByIdAsync(id);
- 
+
+            if (employee == null)
+            {
+                //commented this line
+                //return NotFound(employee);
+
+                //add this line
+                throw new NotFoundException($"The system does not have any Employee with id = {id}");
+            }
+
             return Ok(employee);
         }
 
@@ -62,6 +72,19 @@ namespace Organization.Presentaion.API.Controllers.V1
             {
                 return BadRequest();
             }
+
+            var employeeNameIsExisted = await _unitOfWork.Companies.IsExistingAsync(employeeRequestDto.Name!);
+
+            if (!employeeNameIsExisted)
+            {
+                //IF NAME ALREADY EXISTED, IT WILL RETURN STATUSCODE: 409
+                //we commented this line
+                //return Conflict(employeeRequest);
+
+                //add this line and use DuplicateCompanyException with pass-in specified Company Name if Name is NOT UNIQUE
+                throw new DuplicateNameException($"Employee with Name {employeeRequestDto.Name} is ALREADY EXISTED.");
+            }
+
 
             _unitOfWork.OpenConnectionAndBeginDbTransaction();
 
@@ -96,12 +119,16 @@ namespace Organization.Presentaion.API.Controllers.V1
                 return BadRequest();
             }
 
-            if (employeeRequestDto == null)
-            {
-                return NotFound(employeeRequestDto);
-            }
-
             var employeeToUpdate = await _unitOfWork.Employees.GetByIdAsync(id);
+
+            if (employeeToUpdate == null)
+            {
+                //commented this line
+                //return NotFound(company);
+
+                //add this line
+                throw new NotFoundException($"The system does not have any Employee with id = {id}");
+            }
 
             if (employeeToUpdate != null)
             {
@@ -141,7 +168,11 @@ namespace Organization.Presentaion.API.Controllers.V1
 
             if (employeeToDelete == null)
             {
-                return NotFound(employeeToDelete);
+                //commented this line;
+                //return NotFound(employeeToDelete);
+
+                //add this line
+                throw new NotFoundException($"The system does not have any Employee with id = {id}");
             }
 
             _unitOfWork.OpenConnectionAndBeginDbTransaction();

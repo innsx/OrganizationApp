@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.DTOs;
+using Organization.Application.Commons.Exceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
 using Organization.Domain.Company;
@@ -30,7 +31,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         [ProducesResponseType(typeof(PageList<CompanyResponseDto>), 200)]
         [HttpGet]
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyQueryParameters companyQueryParameters)
-        {
+        {            
             var companies = await _unitOfWork.Companies.GetCompaniesByQueryAsync(companyQueryParameters);
             //var companies = await companyRepository.GetAsync(companyQueryParameters);
 
@@ -52,9 +53,14 @@ namespace Organization.Presentaion.API.Controllers.V1
 
             var company = await _unitOfWork.Companies.QueryOneToManyParentChildRelationshipAsync(id);
 
-            if (company == null)
+            if (company == null || company.Count == 0)
             {
-                return NotFound(company);
+                //commented this line
+                //return NotFound(company);
+
+                //add this line
+                throw new NotFoundException($"The system does not have any Company with id = {id}");
+
             }
 
             return Ok(company);
@@ -69,6 +75,15 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpPost]
         public async Task<IActionResult> AddCompany([FromBody] CompanyRequestDto companyRequestDto)
         {
+            if (await _unitOfWork.Companies.IsExistingAsync(companyRequestDto.Name!))
+            {
+                //WILL RETURN STATUSCODE: 409 conflict if Name existed
+                //return Conflict(companyRequestDto);
+
+                //add this line and use DuplicateCompanyException with pass-in specified Company Name if Name is NOT UNIQUE
+                throw new DuplicateNameException($"Company with Name {companyRequestDto.Name} is ALREADY EXISTED.");
+            }
+
             _unitOfWork.OpenConnectionAndBeginDbTransaction();
 
             var newCompanyId = await _unitOfWork.Companies.AddAsnyc(new Company
@@ -104,7 +119,10 @@ namespace Organization.Presentaion.API.Controllers.V1
 
             if (companyToUpdate == null)
             {
-                return NotFound($"Company with Id: {id} is not found.");
+                //return NotFound($"Company with Id: {id} is not found.");
+
+                //add this line
+                throw new NotFoundException($"The system does not have any Company with id = {id}");
             }
 
             companyToUpdate.Name = companyRequestDto.Name;
@@ -134,7 +152,10 @@ namespace Organization.Presentaion.API.Controllers.V1
 
             if (companyToSoftDelete == null)
             {
-                return NotFound($"Company with Id: {id} not found.");
+                //return NotFound($"Company with Id: {id} not found.");
+
+                //add this line
+                throw new NotFoundException($"The system does not have any Company with id = {id}");
             }
 
             _unitOfWork.OpenConnectionAndBeginDbTransaction();

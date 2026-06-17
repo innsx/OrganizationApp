@@ -73,6 +73,7 @@
     <Build Include="dbo\StoredProcedures\uspSoftDeleteRecord.sql" />
     <Build Include="dbo\StoredProcedures\uspSoftDeleteForeignKeyRecord.sql" />
     <Build Include="dbo\StoredProcedures\uspGetTotalRecordsCount.sql" />
+    <Build Include="dbo\StoredProcedures\uspDoesRecordExist.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="InitializationScript.sql" />

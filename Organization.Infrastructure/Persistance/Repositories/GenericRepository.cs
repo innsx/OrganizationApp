@@ -113,12 +113,12 @@ namespace Organization.Infrastructure.Persistance.Repositories
 
         }
 
-        public async Task<bool> IsExistingAsync(string distinguishingUniqueKeyValue)
+        public async Task<bool> IsExistingAsync(string distinctUniqueKeyValue)
         {
             var parameters = new DynamicParameters();
             parameters.Add("tableName", typeof(TEntity).GetDbTableName(), DbType.String, ParameterDirection.Input, size: 50);
-            parameters.Add("distinguishingUniqueKeyColumnName", typeof(TEntity).GetDistinguishingUniqueKeyName(), DbType.String, ParameterDirection.Input, size: 100);
-            parameters.Add("distinguishingUniquekeyColumnValue", distinguishingUniqueKeyValue, DbType.String, ParameterDirection.Input, size: 100);
+            parameters.Add("distinctUniqueKeyColumnName", typeof(TEntity).GetDistinctUniqueKeyName(), DbType.String, ParameterDirection.Input, size: 100);
+            parameters.Add("distinctUniquekeyColumnValue", distinctUniqueKeyValue, DbType.String, ParameterDirection.Input, size: 100);
 
             using (var connection = _dapperDataContext.Connection)
             {
