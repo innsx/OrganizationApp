@@ -43,21 +43,38 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <response code="404">Could not find the Employee.</response>
         /// <returns>Company</returns>
         [HttpGet("{id:length(22)}")]
-        public async Task<IActionResult> GetEmployeeById(string id)
+        public async Task<IActionResult> GetEmployeeById(string id, bool hasAssociatedObject = false)
         {
-            //var employee = await _unitOfWork.Employees.GetByIdAsync(id);
-            var employee = await _unitOfWork.Employees.GetByIdAsync(id);
-
-            if (employee == null)
+            if (hasAssociatedObject is false)
             {
-                //commented this line
-                //return NotFound(employee);
+                //var employee = await _unitOfWork.Employees.GetByIdAsync(id);
+                var employee = await _unitOfWork.Employees.GetByIdAsync(id);
 
-                //add this line
-                throw new NotFoundException($"The system does not have any Employee with id = {id}");
+                if (employee == null)
+                {
+                    //commented this line
+                    //return NotFound(employee);
+
+                    //add this line
+                    throw new NotFoundException($"The system does not have any Employee with id = {id}");
+                }
+
+                return Ok(employee);
             }
+            else
+            {
+                //var employee = await employeeRepository.QueryOneToManyParentChildRelationshipAsync(id);
 
-            return Ok(employee);
+                var employee = await _unitOfWork.Employees.QueryOneToManyParentChildRelationshipAsync(id);
+
+                if (employee is null)
+                {
+                    //add this line
+                    throw new NotFoundException($"The system does not have any Company with id = {id}");
+                }
+
+                return Ok(employee);
+            }
         }
 
         /// <summary>
@@ -75,7 +92,7 @@ namespace Organization.Presentaion.API.Controllers.V1
 
             var employeeNameIsExisted = await _unitOfWork.Companies.IsExistingAsync(employeeRequestDto.Name!);
 
-            if (!employeeNameIsExisted)
+            if (employeeNameIsExisted is true)
             {
                 //IF NAME ALREADY EXISTED, IT WILL RETURN STATUSCODE: 409
                 //we commented this line

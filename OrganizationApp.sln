@@ -8,6 +8,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{5EB0ABBA-8B1A-46FC-9183-5696061300E2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{F21B9184-72AE-46AA-8314-4FAA641FD378}"
+	ProjectSection(SolutionItems) = preProject
+		Organization.DB\Organization.DB.publish.xml = Organization.DB\Organization.DB.publish.xml
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{53D7E3B8-A445-48F1-A6DC-281201A63330}"
 EndProject

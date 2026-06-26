@@ -46,24 +46,39 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <response code="404">Could not find the company.</response>
         /// <returns>Company</returns>
         [HttpGet("{id:length(22)}")]
-        public async Task<ActionResult<Company>> GetCompanyById(string id)
+        public async Task<ActionResult<Company>> GetCompanyById(string id, bool hasAssociatedObject = false)
         {
-            //var company = await _unitOfWork.Companies.GetByIdAsync(id);
-            //var company = await companyRepository.QueryOneToManyParentChildRelationshipAsync(id);
-
-            var company = await _unitOfWork.Companies.QueryOneToManyParentChildRelationshipAsync(id);
-
-            if (company == null || company.Count == 0)
+            if (hasAssociatedObject is false)
             {
-                //commented this line
-                //return NotFound(company);
+                var company = await _unitOfWork.Companies.GetByIdAsync(id);
+                if (company == null)
+                {
+                    //commented this line
+                    //return NotFound(company);
 
-                //add this line
-                throw new NotFoundException($"The system does not have any Company with id = {id}");
+                    //add this line
+                    throw new NotFoundException($"The system does not have any Company with id = {id}");
 
+                }
+
+                return Ok(company);
+            }
+            else
+            {
+                //var company = await companyRepository.QueryOneToManyParentChildRelationshipAsync(id);
+
+                var company = await _unitOfWork.Companies.QueryOneToManyParentChildRelationshipAsync(id);
+
+                if (company == null || company.Count == 0)
+                {
+                    //add this line
+                    throw new NotFoundException($"The system does not have any Company with id = {id}");
+
+                }
+
+                return Ok(company);
             }
 
-            return Ok(company);
         }
 
 

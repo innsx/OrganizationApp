@@ -1,7 +1,9 @@
-﻿using Organization.Application.Commons.DTOs;
+﻿using Dapper;
+using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
 using Organization.Domain.Commons.Utilities;
+using Organization.Domain.Company.Models;
 using Organization.Domain.Employees;
 using Organization.Domain.Employees.Models;
 using Organization.Infrastructure.Persistance.DataContext;
@@ -10,8 +12,10 @@ namespace Organization.Infrastructure.Persistance.Repositories
 {
     public sealed class EmployeeRepository : GenericRepository<Employee>, IEmployeeRepository
     {
+        private readonly DapperDataContext _dapperDataContext;
         public EmployeeRepository(DapperDataContext dapperDataContext) : base(dapperDataContext)
         {
+            _dapperDataContext = dapperDataContext;
         }
 
         public async Task<PageList<EmployeeResponseDto>> GetEmployeesByQueryAsync(EmployeeQueryParameters employeeQueryParameters)
@@ -75,6 +79,24 @@ namespace Organization.Infrastructure.Persistance.Repositories
 
             return pagedEmployees;
 
+        }
+
+        //https://www.youtube.com/watch?v=rpBmUqrDH8M
+        public async Task<EmployeeResponseDto> QueryOneToManyParentChildRelationshipAsync(string id)
+        {
+
+            string sql = @$" select e.Name, e.Age, c.Name as CompanyName, e.Position, e.Salary, e.CreatedOn
+                                      From tblCompanies c
+                                      inner join tblEmployees e
+                                      on c.Id = e.CompanyId
+                                      where e.Id = '{id}'";
+
+            //Get connected thru DapperDataContext object & Dispose object after
+            using var connection = _dapperDataContext.Connection;
+
+            var employee = await connection!.QueryFirstOrDefaultAsync<EmployeeResponseDto>(sql, new { Id = id });
+
+            return employee!;
         }
 
     }

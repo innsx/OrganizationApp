@@ -27,7 +27,7 @@ namespace Organization.Domain.Company.Models
         [ColumnName("IsDeleted")]
         public bool IsDeleted { get; set; }
 
-
+        //1:N relationship: 1 Company has MANY Employees
         [Navigation(typeof(Employee), "CompanyId")]
         public ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }

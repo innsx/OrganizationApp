@@ -6,9 +6,6 @@ using Organization.Domain.Company;
 using Organization.Domain.Company.Models;
 using Organization.Domain.Employees.Models;
 using Organization.Infrastructure.Persistance.DataContext;
-using System;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using static Dapper.SqlMapper;
 
 namespace Organization.Infrastructure.Persistance.Repositories
@@ -91,8 +88,8 @@ namespace Organization.Infrastructure.Persistance.Repositories
             // Dictionary tracks parents we've already created/seen
             var companyDictionary = new Dictionary<string, Company>();
 
+            //Get connected thru DapperDataContext object & Dispose object after
             using var connection = _dapperDataContext.Connection;
-
 
             IEnumerable<Company> companies = await connection!.QueryAsync<Company, Employee, Company>(
                  sql,
@@ -121,7 +118,9 @@ namespace Organization.Infrastructure.Persistance.Repositories
                 );
 
             // Return the distinct parent record
-            return companyDictionary.Values.ToArray();
+            var companyList = companyDictionary.Values.ToList();
+
+            return companyList;
         }
 
     }
