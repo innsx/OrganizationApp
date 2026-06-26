@@ -10,7 +10,7 @@ namespace Organization.Application.Commons.Interfaces.Persistance
         Task<string> AddAsnyc(TEntity entity);
         Task<bool> IsExistingAsync(string distinctUniqueKeyValue);
         Task UpdateAsync(TEntity entity);
-        Task SoftDeleteAsync(string id, bool isSoftDeleteRecordHasRelatedChildTableColumn = false); 
+        Task SoftDeleteAsync(string id, bool isRecordHasAssociation = false); 
         Task<int> GetTotalCountAsync();
     }
 }

@@ -174,7 +174,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <param name="isSoftDeleteRecordHasRelatedChildTableColumn">**Boolean**</param>
         /// <response code="201">SoftDeletes an Employee successfullly</response>
         [HttpDelete("{id:length(22)}")]
-        public async Task<IActionResult> DeleteEmployee(string id, [FromBody] bool isSoftDeleteRecordHasRelatedChildTableColumn = false)
+        public async Task<IActionResult> DeleteEmployee(string id, bool isRecordHasAssociation = false)
         {
             if (id == null)
             {
@@ -194,7 +194,7 @@ namespace Organization.Presentaion.API.Controllers.V1
 
             _unitOfWork.OpenConnectionAndBeginDbTransaction();
 
-            await _unitOfWork.Employees.SoftDeleteAsync(id, isSoftDeleteRecordHasRelatedChildTableColumn);
+            await _unitOfWork.Employees.SoftDeleteAsync(id, isRecordHasAssociation);
 
             _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
 

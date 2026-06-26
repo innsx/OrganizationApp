@@ -160,7 +160,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <param name="isSoftDeleteRecordHasRelatedChildTableColumn">**CompanyRequest**</param>
         /// <response code="201">SoftDeletes a company successfullly</response>
         [HttpDelete("{id:length(22)}")]
-        public async Task<IActionResult> DeleteCompany(string id, [FromBody] bool isSoftDeleteRecordHasRelatedChildTableColumn = false)
+        public async Task<IActionResult> DeleteCompany(string id, bool isRecordHasAssociation = false)
         {
             var companyToSoftDelete = await _unitOfWork.Companies.GetByIdAsync(id);
             //var companyToSoftDelete = await companyRepository.GetByIdAsync(id);
@@ -174,11 +174,11 @@ namespace Organization.Presentaion.API.Controllers.V1
             }
 
             _unitOfWork.OpenConnectionAndBeginDbTransaction();
-            await _unitOfWork.Companies.SoftDeleteAsync(id, isSoftDeleteRecordHasRelatedChildTableColumn);
+            await _unitOfWork.Companies.SoftDeleteAsync(id, isRecordHasAssociation);
             //await companyRepository.SoftDeleteAsync(id, isSoftDeleteRecordHasRelatedChildTableColumn);
             _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
 
-            if (isSoftDeleteRecordHasRelatedChildTableColumn == true)
+            if (isRecordHasAssociation == true)
             {
                 return Ok($"Company with Id: {id} is successfully Soft-Deleted in Parent Table column and Child Table column");
             }
