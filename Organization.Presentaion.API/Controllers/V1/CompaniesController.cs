@@ -1,13 +1,12 @@
-﻿using MediatR;
+﻿using MapsterMapper;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Organization.Application.Commons.DTOs;
-using Organization.Application.Commons.Exceptions;
-using Organization.Application.Commons.Interfaces.Persistance;
-using Organization.Application.Commons.Utilities;
 using Organization.Application.Commons.CQRS.CompanyModule.Commands;
 using Organization.Application.Commons.CQRS.CompanyModule.Queries;
+using Organization.Application.Commons.DTOs;
+using Organization.Application.Commons.Interfaces.Persistance;
+using Organization.Application.Commons.Utilities;
 using Organization.Domain.Company;
-using Organization.Domain.Company.Models;
 
 namespace Organization.Presentaion.API.Controllers.V1
 {
@@ -21,11 +20,13 @@ namespace Organization.Presentaion.API.Controllers.V1
         private readonly IUnitOfWork _unitOfWork;
         //public IGenericRepository<Company> companyRepository;
         private readonly ISender _sender;
+        private readonly IMapper _mapper;
 
-        public CompaniesController(IUnitOfWork unitOfWork, ISender sender)
+        public CompaniesController(IUnitOfWork unitOfWork, ISender sender, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _sender = sender;
+            _mapper = mapper;
             //companyRepository = _unitOfWork.RepositoryFactory<Company>();
         }
 
@@ -69,12 +70,17 @@ namespace Organization.Presentaion.API.Controllers.V1
         {
             //note: this is manually mapping CompanyRequestDto properties into AddCompanyCommand properties
             //later on, we will use Mapster to do AUTO mapping
-            var addCompanyCommand = new AddCompanyCommand(companyRequestDto.Name, 
-                                                        companyRequestDto.Address, 
-                                                        companyRequestDto.Country);
-                   
+            //var addCompanyCommand = new AddCompanyCommand(companyRequestDto.Name, 
+            //                                            companyRequestDto.Address, 
+            //                                            companyRequestDto.Country);
+
+            //Mappings with Mapster: Map<TDestination>(TSource)
+            var mappedCompany = _mapper.Map<AddCompanyCommand>(companyRequestDto);
+
+
             // we call the ISender Send( )
-            string companyId = await _sender.Send(addCompanyCommand);
+            //string companyId = await _sender.Send(addCompanyCommand);
+            string companyId = await _sender.Send(mappedCompany);
 
             return CreatedAtAction(nameof(GetCompanyById), new { id = companyId }, companyRequestDto);
         }
@@ -88,8 +94,14 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpPut("{id:length(22)}")]
         public async Task<IActionResult> UpdateCompany(string id, [FromBody] CompanyRequestDto companyRequestDto)
         {
-            await _sender.Send(new UpdateCompanyCommand(id, companyRequestDto.Name, companyRequestDto.Address, companyRequestDto.Country));
-            return Ok();
+            //await _sender.Send(new UpdateCompanyCommand(id, companyRequestDto.Name, companyRequestDto.Address, companyRequestDto.Country));
+
+            //Mappings with Mapster: Map<TDestination>(TSource)
+            var mappedCompany = _mapper.Map<UpdateCompanyCommand>((id, companyRequestDto));
+
+            await _sender.Send(mappedCompany);
+
+            return CreatedAtAction(nameof(GetCompanyById), new { id }, companyRequestDto); 
         }
 
 
@@ -97,7 +109,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// This endpoint SoftDeletes a company in the system.
         /// </summary>
         /// <param name="id">**string**</param>
-        /// <param name="isSoftDeleteRecordHasRelatedChildTableColumn">**CompanyRequest**</param>
+        /// <param name="isDeleteHasAssociations">**CompanyRequest**</param>
         /// <response code="201">SoftDeletes a company successfullly</response>
         [HttpDelete("{id:length(22)}")]
         public async Task<IActionResult> DeleteCompany(string id, bool isDeleteHasAssociations = false)

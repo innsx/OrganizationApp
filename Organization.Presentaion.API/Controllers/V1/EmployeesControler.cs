@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using MapsterMapper;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.CQRS.EmployeeModule.Commands;
 using Organization.Application.Commons.CQRS.EmployeeModule.Queries;
@@ -20,11 +21,13 @@ namespace Organization.Presentaion.API.Controllers.V1
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISender _sender;
+        private readonly IMapper _mapper;
 
-        public EmployeesController(IUnitOfWork unitOfWork, ISender sender)
+        public EmployeesController(IUnitOfWork unitOfWork, ISender sender, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _sender = sender;
+            _mapper = mapper;
         }
 
 
@@ -76,20 +79,28 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <param name="employeeRequestDto">**EmployeeResponse**</param>
         /// <response code="201">Updates a Employee successfullly</response>
         [HttpPut("{id:length(22)}")]
-        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] EmployeeRequestDto employeeRequestDto)
+        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] UpdateEmployeeRequestDto updateEmployeeRequestDto)
         {
-            await _sender.Send(new UpdateEmployeeCommand(
-                id, 
-                employeeRequestDto.Name, 
-                employeeRequestDto.Age, 
-                employeeRequestDto.Position, 
-                employeeRequestDto.Salary, 
-                employeeRequestDto.CreatedOn,
-                employeeRequestDto.ModifiedOn, 
-                employeeRequestDto.CompanyId
-                ));
+            //manually mapping the EmployeeRequestDto to UpdateEmployeeCommand
+            //await _sender.Send(new UpdateEmployeeCommand(
+            //    id, 
+            //    employeeRequestDto.Name, 
+            //    employeeRequestDto.Age, 
+            //    employeeRequestDto.Position, 
+            //    employeeRequestDto.Salary, 
+            //    employeeRequestDto.CreatedOn,
+            //    employeeRequestDto.ModifiedOn, 
+            //    employeeRequestDto.CompanyId
+            //    ));
 
-            return NoContent();
+            //using MapsterMapper to map the EmployeeRequestDto to UpdateEmployeeCommand
+            var mappedEmployee = _mapper.Map<UpdateEmployeeCommand>((id, updateEmployeeRequestDto));
+
+            await _sender.Send(mappedEmployee);
+
+
+            return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id }, mappedEmployee));
+
         }
 
 

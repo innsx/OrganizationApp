@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Organization.Presentaion.API.Common.Mappings;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Options;
@@ -39,7 +40,8 @@ namespace Organization.Presentaion.API.Configurations
             //this is a API Versioning setup to work with SwaggerUI
             services.AddApiVersioning(options =>
             {
-                //get or set a value indicating API Versioning is compatible in the API information response
+                //get or set a value indicating API Versioning is compatible
+                //in the API information response
                 options.ReportApiVersions = true;
 
                 //Implementing URI API versioning
@@ -49,10 +51,10 @@ namespace Organization.Presentaion.API.Configurations
                 //take the 1st version, if NOT Specified a version at this line above “options.DefaultApiVersion…”
                 options.AssumeDefaultVersionWhenUnspecified = true;
 
-                //Implementing query string custom API versioning
+                // ---- OPTION: if Implementing query string custom API versioning, use this line -------------
                 //options.ApiVersionReader = new QueryStringApiVersionReader("organisationApp-api-version with Query String");
-               
-                //Implementing header API versioning
+
+                // ---- OPTION: if Implementing header API versioning, use this line --------------------------
                 //options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version");
             });
 
@@ -78,6 +80,8 @@ namespace Organization.Presentaion.API.Configurations
             //REGISTERING CustomProblemDetailsFactory with injecting System's ProblemDetailsFactory class
             services.AddSingleton<ProblemDetailsFactory, CustomProblemDetailsFactory>();
 
+            //we call static AddMappingConfigurations( ) in DependencyInjections.cs Class & REGISTER Global Mapping configurations with MAPster "AddMappings" object
+            services.AddMappingConfigurations();
 
             return services;
         }
