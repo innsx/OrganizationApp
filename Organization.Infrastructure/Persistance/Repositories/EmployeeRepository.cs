@@ -3,7 +3,6 @@ using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
 using Organization.Domain.Commons.Utilities;
-using Organization.Domain.Company.Models;
 using Organization.Domain.Employees;
 using Organization.Domain.Employees.Models;
 using Organization.Infrastructure.Persistance.DataContext;
@@ -21,16 +20,9 @@ namespace Organization.Infrastructure.Persistance.Repositories
         public async Task<PageList<EmployeeResponseDto>> GetEmployeesByQueryAsync(EmployeeQueryParameters employeeQueryParameters)
         {
             //using pass-in EmployeeQueryParameters & specified needed columns that we SPECIFIED in DTO EmployeeResponse 
-            var employees = (await GetAsync(employeeQueryParameters, "Name", "Age", "Position", "Salary"))
+            var employees = (await GetAsync(employeeQueryParameters, "Name", "Age", "Position", "Salary", "CreatedOn", "ModifiedOn", "CompanyId"))
                                 .AsQueryable()
-                                .Select(e => new EmployeeResponseDto  //manually converting EmployeeResponse object
-                                {
-                                    //mapping the PROPERTIES
-                                    Name = e.Name,
-                                    Age = e.Age,
-                                    Position = e.Position,
-                                    Salary = e.Salary,
-                                }); //in future, we will use MAPPester tool to AUTOMATIC converting an OBJECT into another OBJECT
+                                .Select(e => new EmployeeResponseDto(e.Name, e.Age, e.Position, e.Salary, e.CreatedOn, e.ModifiedOn, e.CompanyId));
 
 
             //DEMO only: manually hard-coded employees total Counts = 200000000; from tblEmployee table

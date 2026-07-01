@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Organization.Application.Commons.CQRS.EmployeeModule.Commands;
+using Organization.Application.Commons.CQRS.EmployeeModule.Queries;
 using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Exceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
@@ -16,10 +19,12 @@ namespace Organization.Presentaion.API.Controllers.V1
     public class EmployeesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISender _sender;
 
-        public EmployeesController(IUnitOfWork unitOfWork)
+        public EmployeesController(IUnitOfWork unitOfWork, ISender sender)
         {
             _unitOfWork = unitOfWork;
+            _sender = sender;
         }
 
 
@@ -31,7 +36,8 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpGet]
         public async Task<IActionResult> GetEmployees([FromQuery] EmployeeQueryParameters employeeQueryParameters)
         {
-            var employees = await _unitOfWork.Employees.GetEmployeesByQueryAsync(employeeQueryParameters);
+            var employees = await _sender.Send(new GetEmployeesQuery(employeeQueryParameters));
+            
             return Ok(employees);
         }
 
@@ -43,38 +49,10 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <response code="404">Could not find the Employee.</response>
         /// <returns>Company</returns>
         [HttpGet("{id:length(22)}")]
-        public async Task<IActionResult> GetEmployeeById(string id, bool hasAssociatedObject = false)
+        public async Task<IActionResult> GetEmployeeById(string id) //bool hasAssociatedObject = false
         {
-            if (hasAssociatedObject is false)
-            {
-                //var employee = await _unitOfWork.Employees.GetByIdAsync(id);
-                var employee = await _unitOfWork.Employees.GetByIdAsync(id);
-
-                if (employee == null)
-                {
-                    //commented this line
-                    //return NotFound(employee);
-
-                    //add this line
-                    throw new NotFoundException($"The system does not have any Employee with id = {id}");
-                }
-
-                return Ok(employee);
-            }
-            else
-            {
-                //var employee = await employeeRepository.QueryOneToManyParentChildRelationshipAsync(id);
-
-                var employee = await _unitOfWork.Employees.QueryOneToManyParentChildRelationshipAsync(id);
-
-                if (employee is null)
-                {
-                    //add this line
-                    throw new NotFoundException($"The system does not have any Company with id = {id}");
-                }
-
-                return Ok(employee);
-            }
+            var employee = await _sender.Send(new GetEmployeeByIdQuery(id));
+            return Ok(employee);
         }
 
         /// <summary>
@@ -85,38 +63,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpPost("employee")]
         public async Task<IActionResult> AddEmployee([FromBody] EmployeeRequestDto employeeRequestDto)
         {
-            if (employeeRequestDto == null)
-            {
-                return BadRequest();
-            }
-
-            var employeeNameIsExisted = await _unitOfWork.Companies.IsExistingAsync(employeeRequestDto.Name!);
-
-            if (employeeNameIsExisted is true)
-            {
-                //IF NAME ALREADY EXISTED, IT WILL RETURN STATUSCODE: 409
-                //we commented this line
-                //return Conflict(employeeRequest);
-
-                //add this line and use DuplicateCompanyException with pass-in specified Company Name if Name is NOT UNIQUE
-                throw new DuplicateNameException($"Employee with Name {employeeRequestDto.Name} is ALREADY EXISTED.");
-            }
-
-
-            _unitOfWork.OpenConnectionAndBeginDbTransaction();
-
-            string employeeId = await _unitOfWork.Employees.AddAsnyc(
-                new Employee     //creating a new Company object & INITIALIZING Company PROPERTIES
-                {
-                    Name = employeeRequestDto.Name,
-                    Age = employeeRequestDto.Age,
-                    Position = employeeRequestDto.Position,
-                    Salary = employeeRequestDto.Salary,
-                    CompanyId = employeeRequestDto.CompanyId,
-                }
-            );
-
-            _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
+            var employeeId = await _sender.Send(new AddEmployeeCommand(employeeRequestDto));
 
             return Ok(CreatedAtAction(nameof(GetEmployeeById), new {id = employeeId}, employeeRequestDto));
         }
@@ -131,39 +78,18 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpPut("{id:length(22)}")]
         public async Task<IActionResult> UpdateEmployee(string id, [FromBody] EmployeeRequestDto employeeRequestDto)
         {
-            if (id == null)
-            {
-                return BadRequest();
-            }
+            await _sender.Send(new UpdateEmployeeCommand(
+                id, 
+                employeeRequestDto.Name, 
+                employeeRequestDto.Age, 
+                employeeRequestDto.Position, 
+                employeeRequestDto.Salary, 
+                employeeRequestDto.CreatedOn,
+                employeeRequestDto.ModifiedOn, 
+                employeeRequestDto.CompanyId
+                ));
 
-            var employeeToUpdate = await _unitOfWork.Employees.GetByIdAsync(id);
-
-            if (employeeToUpdate == null)
-            {
-                //commented this line
-                //return NotFound(company);
-
-                //add this line
-                throw new NotFoundException($"The system does not have any Employee with id = {id}");
-            }
-
-            if (employeeToUpdate != null)
-            {
-                employeeToUpdate.Name = employeeRequestDto.Name;
-                employeeToUpdate.Age = employeeRequestDto.Age;
-                employeeToUpdate.Position = employeeRequestDto.Position;
-                employeeToUpdate.Salary = employeeRequestDto.Salary;
-                employeeToUpdate.CompanyId = employeeRequestDto.CompanyId;
-                employeeToUpdate.ModifiedOn = DateTime.Now;
-            }
-
-            _unitOfWork.OpenConnectionAndBeginDbTransaction();
-
-            await _unitOfWork.Employees.UpdateAsync(employeeToUpdate!);
-
-            _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
-
-            return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id }, employeeToUpdate));
+            return NoContent();
         }
 
 
@@ -171,7 +97,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// This endpoint SoftDeletes of an Employee in the system.
         /// </summary>
         /// <param name="id">**string**</param>
-        /// <param name="isSoftDeleteRecordHasRelatedChildTableColumn">**Boolean**</param>
+        /// <param name="isRecordHasAssociation">**Boolean**</param>
         /// <response code="201">SoftDeletes an Employee successfullly</response>
         [HttpDelete("{id:length(22)}")]
         public async Task<IActionResult> DeleteEmployee(string id, bool isRecordHasAssociation = false)
@@ -181,22 +107,7 @@ namespace Organization.Presentaion.API.Controllers.V1
                 return BadRequest();
             }
 
-            var employeeToDelete = await _unitOfWork.Employees.GetByIdAsync(id);
-
-            if (employeeToDelete == null)
-            {
-                //commented this line;
-                //return NotFound(employeeToDelete);
-
-                //add this line
-                throw new NotFoundException($"The system does not have any Employee with id = {id}");
-            }
-
-            _unitOfWork.OpenConnectionAndBeginDbTransaction();
-
-            await _unitOfWork.Employees.SoftDeleteAsync(id, isRecordHasAssociation);
-
-            _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
+            await _sender.Send(new DeleteEmployeeCommand(id, isRecordHasAssociation));
 
             return Ok("Employee successfully softDeleted.");
         }

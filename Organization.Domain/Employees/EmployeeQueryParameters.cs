@@ -4,6 +4,5 @@ namespace Organization.Domain.Employees
 {
     public sealed class EmployeeQueryParameters : QueryParameters
     {
-      
     }
 }

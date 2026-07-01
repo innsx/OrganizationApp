@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Exceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
+using Organization.Application.Commons.CQRS.CompanyModule.Commands;
+using Organization.Application.Commons.CQRS.CompanyModule.Queries;
 using Organization.Domain.Company;
 using Organization.Domain.Company.Models;
 
@@ -17,10 +20,12 @@ namespace Organization.Presentaion.API.Controllers.V1
     {
         private readonly IUnitOfWork _unitOfWork;
         //public IGenericRepository<Company> companyRepository;
+        private readonly ISender _sender;
 
-        public CompaniesController(IUnitOfWork unitOfWork)
+        public CompaniesController(IUnitOfWork unitOfWork, ISender sender)
         {
             _unitOfWork = unitOfWork;
+            _sender = sender;
             //companyRepository = _unitOfWork.RepositoryFactory<Company>();
         }
 
@@ -31,9 +36,9 @@ namespace Organization.Presentaion.API.Controllers.V1
         [ProducesResponseType(typeof(PageList<CompanyResponseDto>), 200)]
         [HttpGet]
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyQueryParameters companyQueryParameters)
-        {            
-            var companies = await _unitOfWork.Companies.GetCompaniesByQueryAsync(companyQueryParameters);
+        {
             //var companies = await companyRepository.GetAsync(companyQueryParameters);
+            var companies = await _sender.Send(new GetCompaniesQuery(companyQueryParameters));
 
             return Ok(companies);
         }
@@ -46,39 +51,11 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <response code="404">Could not find the company.</response>
         /// <returns>Company</returns>
         [HttpGet("{id:length(22)}")]
-        public async Task<ActionResult<Company>> GetCompanyById(string id, bool hasAssociatedObject = false)
-        {
-            if (hasAssociatedObject is false)
-            {
-                var company = await _unitOfWork.Companies.GetByIdAsync(id);
-                if (company == null)
-                {
-                    //commented this line
-                    //return NotFound(company);
+        public async Task<ActionResult<CompanyResponseDto>> GetCompanyById(string id, bool hasAssociatedObject = false)
+        {            
+            var company = await _sender.Send(new GetCompanyByIdQuery(id, hasAssociatedObject));
 
-                    //add this line
-                    throw new NotFoundException($"The system does not have any Company with id = {id}");
-
-                }
-
-                return Ok(company);
-            }
-            else
-            {
-                //var company = await companyRepository.QueryOneToManyParentChildRelationshipAsync(id);
-
-                var company = await _unitOfWork.Companies.QueryOneToManyParentChildRelationshipAsync(id);
-
-                if (company == null || company.Count == 0)
-                {
-                    //add this line
-                    throw new NotFoundException($"The system does not have any Company with id = {id}");
-
-                }
-
-                return Ok(company);
-            }
-
+            return Ok(company);
         }
 
 
@@ -90,34 +67,16 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpPost]
         public async Task<IActionResult> AddCompany([FromBody] CompanyRequestDto companyRequestDto)
         {
-            if (await _unitOfWork.Companies.IsExistingAsync(companyRequestDto.Name!))
-            {
-                //WILL RETURN STATUSCODE: 409 conflict if Name existed
-                //return Conflict(companyRequestDto);
+            //note: this is manually mapping CompanyRequestDto properties into AddCompanyCommand properties
+            //later on, we will use Mapster to do AUTO mapping
+            var addCompanyCommand = new AddCompanyCommand(companyRequestDto.Name, 
+                                                        companyRequestDto.Address, 
+                                                        companyRequestDto.Country);
+                   
+            // we call the ISender Send( )
+            string companyId = await _sender.Send(addCompanyCommand);
 
-                //add this line and use DuplicateCompanyException with pass-in specified Company Name if Name is NOT UNIQUE
-                throw new DuplicateNameException($"Company with Name {companyRequestDto.Name} is ALREADY EXISTED.");
-            }
-
-            _unitOfWork.OpenConnectionAndBeginDbTransaction();
-
-            var newCompanyId = await _unitOfWork.Companies.AddAsnyc(new Company
-            {
-                Name = companyRequestDto.Name,
-                Address = companyRequestDto.Address,
-                Country = companyRequestDto.Country,
-            });
-
-            //var newCompanyId = await companyRepository.AddAsnyc(new Company
-            //{
-            //    Name = companyRequestDto.Name,
-            //    Address = companyRequestDto.Address,
-            //    Country = companyRequestDto.Country,
-            //});
-
-            _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
-
-            return CreatedAtAction(nameof(GetCompanyById), new { id = newCompanyId }, companyRequestDto);
+            return CreatedAtAction(nameof(GetCompanyById), new { id = companyId }, companyRequestDto);
         }
 
         /// <summary>
@@ -129,27 +88,8 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpPut("{id:length(22)}")]
         public async Task<IActionResult> UpdateCompany(string id, [FromBody] CompanyRequestDto companyRequestDto)
         {
-            var companyToUpdate = await _unitOfWork.Companies.GetByIdAsync(id);
-            //var companyToUpdate = await companyRepository.GetByIdAsync(id);
-
-            if (companyToUpdate == null)
-            {
-                //return NotFound($"Company with Id: {id} is not found.");
-
-                //add this line
-                throw new NotFoundException($"The system does not have any Company with id = {id}");
-            }
-
-            companyToUpdate.Name = companyRequestDto.Name;
-            companyToUpdate.Address = companyRequestDto.Address;
-            companyToUpdate.Country = companyRequestDto.Country;
-
-            _unitOfWork.OpenConnectionAndBeginDbTransaction();
-            await _unitOfWork.Companies.UpdateAsync(companyToUpdate);
-            //await companyRepository.UpdateAsync(companyToUpdate);
-            _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
-
-            return CreatedAtAction("GetCompanyById", new { id }, companyToUpdate);
+            await _sender.Send(new UpdateCompanyCommand(id, companyRequestDto.Name, companyRequestDto.Address, companyRequestDto.Country));
+            return Ok();
         }
 
 
@@ -160,33 +100,12 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <param name="isSoftDeleteRecordHasRelatedChildTableColumn">**CompanyRequest**</param>
         /// <response code="201">SoftDeletes a company successfullly</response>
         [HttpDelete("{id:length(22)}")]
-        public async Task<IActionResult> DeleteCompany(string id, bool isRecordHasAssociation = false)
+        public async Task<IActionResult> DeleteCompany(string id, bool isDeleteHasAssociations = false)
         {
-            var companyToSoftDelete = await _unitOfWork.Companies.GetByIdAsync(id);
-            //var companyToSoftDelete = await companyRepository.GetByIdAsync(id);
+            await _sender.Send(new DeleteCompanyCommand(id, isDeleteHasAssociations));
 
-            if (companyToSoftDelete == null)
-            {
-                //return NotFound($"Company with Id: {id} not found.");
+            return Ok();
 
-                //add this line
-                throw new NotFoundException($"The system does not have any Company with id = {id}");
-            }
-
-            _unitOfWork.OpenConnectionAndBeginDbTransaction();
-            await _unitOfWork.Companies.SoftDeleteAsync(id, isRecordHasAssociation);
-            //await companyRepository.SoftDeleteAsync(id, isSoftDeleteRecordHasRelatedChildTableColumn);
-            _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
-
-            if (isRecordHasAssociation == true)
-            {
-                return Ok($"Company with Id: {id} is successfully Soft-Deleted in Parent Table column and Child Table column");
-            }
-            else
-            {
-                return Ok($"Company with Id: {id} is successfully Soft-Deleted in Parent Table column");
-
-            }
         }
 
     }

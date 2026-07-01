@@ -1,4 +1,5 @@
-﻿using Organization.Application.Commons.DTOs;
+﻿using Dapper;
+using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
 using Organization.Domain.Commons.Utilities;
@@ -6,7 +7,6 @@ using Organization.Domain.Company;
 using Organization.Domain.Company.Models;
 using Organization.Domain.Employees.Models;
 using Organization.Infrastructure.Persistance.DataContext;
-using static Dapper.SqlMapper;
 
 namespace Organization.Infrastructure.Persistance.Repositories
 {
@@ -20,44 +20,50 @@ namespace Organization.Infrastructure.Persistance.Repositories
 
         public async Task<PageList<CompanyResponseDto>> GetCompaniesByQueryAsync(CompanyQueryParameters companyQueryParameters)
         {
-            //using pass-in EmployeeQueryParameters & specified needed columns that we SPECIFIED in DTO EmployeeResponse 
+            //using pass-in CompanyQueryParameters & specified needed columns that we SPECIFIED in DTO CompanyResponseDto 
             var companies = (await GetAsync(companyQueryParameters, "Name", "Address", "Country"))
                                 .AsQueryable()
-                                .Select(e => new CompanyResponseDto  //manually converting EmployeeResponse object
-                                {
-                                    //mapping the PROPERTIES
-                                    Name = e.Name,
-                                    Address = e.Address,
-                                    Country = e.Country
-                                }); //in future, we will use MAPPester tool to AUTOMATIC converting an OBJECT into another OBJECT
+                                .Select(e => new CompanyResponseDto(e.Name!, e.Address!, e.Country!)); //now using a RECORD CompanyResponseDto
+                                                                                                       //.Select(e => new CompanyResponseDto(e.Name, e.Address, e.Country));  //was using CompanyResponseDto class
+                                                                                                       //{
+                                                                                                       //    //mapping the PROPERTIES                                    
+                                                                                                       //    Name = e.Name,
+                                                                                                       //    Address = e.Address,
+                                                                                                       //    Country = e.Country
+                                                                                                       //}); //in future, we will use MAPPester tool to AUTOMATIC converting an OBJECT into another OBJECT
+
+
+
+            // we check if companyQueryParameters FilterBy Property is NOT NULL or EMPTY
+            if (!string.IsNullOrEmpty(companyQueryParameters.FilterBy))
+            {
+                //NOT EMPTY, then Filtering
+                companies = companies.Where(e => e.Name!.ToLowerInvariant() //returning Companies by Name
+                                                        .Contains(companyQueryParameters.FilterBy.ToLowerInvariant())
+                                               || e.Address!.ToLowerInvariant() //returning Companies by Address
+                                                        .Contains(companyQueryParameters.FilterBy.ToLowerInvariant())
+                                               || e.Country!.ToLowerInvariant() //returning Companies by Country
+                                                        .Contains(companyQueryParameters.FilterBy.ToLowerInvariant())
+                                           );
+            }
+
+
+            //Sorting by using REFLECTION to get the Specified Column 
+            if (!string.IsNullOrEmpty(companyQueryParameters.SortBy))
+            {
+                if (typeof(Company).GetProperty(companyQueryParameters.SortBy) is not null)
+                {
+                    companies = companies.OrderByCustom(companyQueryParameters.SortBy,
+                                                        companyQueryParameters.SortOrder);
+                }
+            }
 
             //manually hard-coded company total Counts from tblCompany table for DEMO only
             //OPTION: we can also do a CALL to a method to RETURN tblCompany total counts,
             //but its RESOURCES INTESIVE, we do not wanted that
             int companyTotalCount = await GetTotalCountAsync();  //will use spGetTotalRecordsCount in GenericRepository.cs to return the counts
 
-
-            // we check if EmployeeQueryParameters FilterBy Property is NOT NULL or EMPTY
-            if (!string.IsNullOrEmpty(companyQueryParameters.FilterBy))
-            {
-                //NOT EMPTY, then Filter the returning Employees by Name
-                companies = companies.Where(e => e.Name!.ToLowerInvariant()
-                                                        .Contains(companyQueryParameters.FilterBy.ToLowerInvariant())
-                                               || e.Address!.ToLowerInvariant()
-                                                        .Contains(companyQueryParameters.FilterBy.ToLowerInvariant())
-                                               || e.Country!.ToLowerInvariant()
-                                                        .Contains(companyQueryParameters.FilterBy.ToLowerInvariant())
-                                           );
-            }
-
-            if (!string.IsNullOrEmpty(companyQueryParameters.SortBy))
-            {
-                if (typeof(Employee).GetProperty(companyQueryParameters.SortBy) is not null)
-                {
-                    companies = companies.OrderByCustom(companyQueryParameters.SortBy,
-                                                        companyQueryParameters.SortOrder);
-                }
-            }
+            var companies1 = companies.AsEnumerable();
 
             //this line will get CALL every time 
             //so this will create TRAFFICE Bottle-neck
@@ -65,7 +71,7 @@ namespace Organization.Infrastructure.Persistance.Repositories
             //"CACHE" it and save the response in-memory,
             //so we can ACCESS the return reponse from in-memory instead
             //the PageList.cs STATIC Create( ) is REFERENCED 
-            var pagedCompany = PageList<CompanyResponseDto>.Create(companies,
+            var pagedCompany = PageList<CompanyResponseDto>.Create(companies1,
                                                                     companyQueryParameters.PageNumber,
                                                                     companyQueryParameters.PageSize,
                                                                     companyTotalCount);
