@@ -61,14 +61,14 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <summary>
         /// This endpoint adds an Employee in the system.
         /// </summary>
-        /// <param name="employeeRequestDto">**CreateEmployeeRequest**</param>
+        /// <param name="addEmployeeRequestDto">**CreateEmployeeRequest**</param>
         /// <response code="201">Adds an Employee successfullly</response>
         [HttpPost("employee")]
-        public async Task<IActionResult> AddEmployee([FromBody] EmployeeRequestDto employeeRequestDto)
+        public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeRequestDto addEmployeeRequestDto)
         {
-            var employeeId = await _sender.Send(new AddEmployeeCommand(employeeRequestDto));
+            var employeeId = await _sender.Send(new AddEmployeeCommand(addEmployeeRequestDto));
 
-            return Ok(CreatedAtAction(nameof(GetEmployeeById), new {id = employeeId}, employeeRequestDto));
+            return Ok(CreatedAtAction(nameof(GetEmployeeById), new {id = employeeId}, addEmployeeRequestDto));
         }
 
 
@@ -76,7 +76,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// This endpoint updates a Employee in the system.
         /// </summary>
         /// <param name="id">**string**</param>
-        /// <param name="employeeRequestDto">**EmployeeResponse**</param>
+        /// <param name="updateEmployeeRequestDto">**EmployeeResponse**</param>
         /// <response code="201">Updates a Employee successfullly</response>
         [HttpPut("{id:length(22)}")]
         public async Task<IActionResult> UpdateEmployee(string id, [FromBody] UpdateEmployeeRequestDto updateEmployeeRequestDto)

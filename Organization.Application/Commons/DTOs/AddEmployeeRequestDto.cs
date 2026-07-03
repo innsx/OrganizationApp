@@ -16,7 +16,7 @@
 
     //}
 
-    public record EmployeeRequestDto(
+    public record AddEmployeeRequestDto(
         string Name, 
         int Age, 
         string Position, 

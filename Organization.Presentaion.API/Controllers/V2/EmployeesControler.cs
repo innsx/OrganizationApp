@@ -56,7 +56,7 @@ namespace Organization.Presentaion.API.Controllers.V2
         /// <param name="employeeRequestDto">**CreateEmployeeRequest**</param>
         /// <response code="201">Adds an Employee successfullly</response>
         [HttpPost("employee")]
-        public async Task<IActionResult> AddEmployee([FromBody] EmployeeRequestDto employeeRequestDto)
+        public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeRequestDto employeeRequestDto)
         {
             if (employeeRequestDto == null)
             {
@@ -89,7 +89,7 @@ namespace Organization.Presentaion.API.Controllers.V2
         /// <param name="employeeRequestDto">**EmployeeResponse**</param>
         /// <response code="201">Updates a Employee successfullly</response>
         [HttpPut("{id:length(22)}")]
-        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] EmployeeRequestDto employeeRequestDto)
+        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] AddEmployeeRequestDto employeeRequestDto)
         {
             if (id == null)
             {
