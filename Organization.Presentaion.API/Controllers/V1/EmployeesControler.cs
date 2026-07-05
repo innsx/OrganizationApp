@@ -1,12 +1,14 @@
-﻿using MapsterMapper;
+﻿using ErrorOr;
+using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.CQRS.EmployeeModule.Commands;
 using Organization.Application.Commons.CQRS.EmployeeModule.Queries;
-using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.CustomizedExceptions;
+using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
+using Organization.Domain.Commons.Errors;
 using Organization.Domain.Company.Models;
 using Organization.Domain.Employees;
 using Organization.Domain.Employees.Models;
@@ -40,9 +42,12 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpGet]
         public async Task<IActionResult> GetEmployees([FromQuery] EmployeeQueryParameters employeeQueryParameters)
         {
-            var employees = await _sender.Send(new GetEmployeesQuery(employeeQueryParameters));
-            
-            return Ok(employees);
+            var result = await _sender.Send(new GetEmployeesQuery(employeeQueryParameters));
+
+            return result.Match(
+                result => Ok(result),
+                errors => GetProblemFromErrorsCollection(errors)
+                );
         }
 
         /// <summary>
@@ -55,8 +60,12 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpGet("{id:length(22)}")]
         public async Task<IActionResult> GetEmployeeById(string id) //bool hasAssociatedObject = false
         {
-            var employee = await _sender.Send(new GetEmployeeByIdQuery(id));
-            return Ok(employee);
+            var result = await _sender.Send(new GetEmployeeByIdQuery(id));
+
+            return result.Match(
+                result => Ok(result),
+                errors => GetProblemFromErrorsCollection(errors)
+                );
         }
 
         /// <summary>
@@ -67,9 +76,16 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpPost("employee")]
         public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeRequestDto addEmployeeRequestDto)
         {
-            var employeeId = await _sender.Send(new AddEmployeeCommand(addEmployeeRequestDto));
+            //var employeeId = await _sender.Send(new AddEmployeeCommand(addEmployeeRequestDto));
 
-            return Ok(CreatedAtAction(nameof(GetEmployeeById), new {id = employeeId}, addEmployeeRequestDto));
+            //return Ok(CreatedAtAction(nameof(GetEmployeeById), new {id = employeeId}, addEmployeeRequestDto));
+
+             var result = await _sender.Send(new AddEmployeeCommand(addEmployeeRequestDto));
+
+            return result.Match(
+                result => Ok(CreatedAtAction(nameof(GetEmployeeById), new { id = result }, addEmployeeRequestDto)),
+                errors => GetProblemFromErrorsCollection(errors)
+                );
         }
 
 
@@ -97,10 +113,14 @@ namespace Organization.Presentaion.API.Controllers.V1
             //using MapsterMapper to map the EmployeeRequestDto to UpdateEmployeeCommand
             var mappedEmployee = _mapper.Map<UpdateEmployeeCommand>((id, updateEmployeeRequestDto));
 
-            await _sender.Send(mappedEmployee);
+            var result = await _sender.Send(mappedEmployee);
 
 
-            return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id }, mappedEmployee));
+            //return Ok(CreatedAtAction(nameof(GetEmployeeById), new { id }, mappedEmployee));
+            return result.Match(
+                result => Ok(CreatedAtAction(nameof(GetEmployeeById), new { id }, mappedEmployee)),
+                errors => GetProblemFromErrorsCollection(errors)
+                ); 
 
         }
 
@@ -119,10 +139,13 @@ namespace Organization.Presentaion.API.Controllers.V1
                 return BadRequest();
             }
 
-            await _sender.Send(new DeleteEmployeeCommand(id, isRecordHasAssociation));
+            var result = await _sender.Send(new DeleteEmployeeCommand(id, isRecordHasAssociation));
 
-            return Ok("Employee successfully softDeleted.");
-        }
+            return result.Match(
+                result => Ok("Employee successfully softDeleted."),
+                errors => GetProblemFromErrorsCollection(errors)
+                );
+        } 
     }
 }
 

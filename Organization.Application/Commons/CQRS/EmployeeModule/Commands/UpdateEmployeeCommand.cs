@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using ErrorOr;
+using MediatR;
 
 namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 {
@@ -10,5 +11,5 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
         decimal Salary,  
         DateTime CreatedOn,
         DateTime ModifiedOn,
-        string CompanyId) : IRequest;
+        string CompanyId) : IRequest<ErrorOr<Unit>>;
 }

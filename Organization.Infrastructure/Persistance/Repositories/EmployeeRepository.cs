@@ -40,11 +40,16 @@ namespace Organization.Infrastructure.Persistance.Repositories
                                                         .Contains(employeeQueryParameters.FilterBy.ToLowerInvariant())
                                               || e.Position!.ToLowerInvariant()
                                                         .Contains(employeeQueryParameters.FilterBy.ToLowerInvariant())
-                                           
+                                              || e.Age.ToString()!.ToLowerInvariant()
+                                                        .Contains(employeeQueryParameters.FilterBy.ToLowerInvariant())
+                                              || e.Salary.ToString()!.ToLowerInvariant()
+                                                        .Contains(employeeQueryParameters.FilterBy.ToLowerInvariant())
                                            );
 
                 //string targetProperty = "Age";
-                //employees = employees.Where(e => (int)e.GetType().GetProperty(targetProperty).GetValue(e)) == employeeQueryParameters.FilterBy;
+                //employees = employees.Where(e => (int)e.GetType()
+                //.GetProperty(targetProperty)
+                //.GetValue(e)) == employeeQueryParameters.FilterBy;
 
             }
 

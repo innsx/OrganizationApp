@@ -2,10 +2,12 @@
 using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.CustomizedExceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
+using ErrorOr; 
+using Organization.Domain.Commons.Errors;
 
 namespace Organization.Application.Commons.CQRS.EmployeeModule.Queries
 {
-    public class GetEmployeeByIdQueryHandler : IRequestHandler<GetEmployeeByIdQuery, EmployeeResponseDto>
+    public class GetEmployeeByIdQueryHandler : IRequestHandler<GetEmployeeByIdQuery, ErrorOr<EmployeeResponseDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -14,17 +16,22 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Queries
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<EmployeeResponseDto> Handle(GetEmployeeByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<EmployeeResponseDto>> Handle(GetEmployeeByIdQuery request, CancellationToken cancellationToken)
         {
             var employee = await _unitOfWork.Employees.GetByIdAsync(request.id);
 
             if (employee == null)
             {
-                //commented this line
+                //1st approach: commented this line
                 //return NotFound(employee);
 
-                //add this line
-                throw new EmployeeNotFoundException($"The system does not have any Employee with id = {request.id}");
+                //2nd approach: Throw customized exception
+                //throw new EmployeeNotFoundException($"The system does not have any Employee with id = {request.id}");
+
+                //3rd approach: using ErrorOr                            
+                var errorMessage = Errors.Employee.EmployeeDoesNotExist($"The system does not have any Employee with Id: ${request.id}");
+
+                return errorMessage;
             }
 
             return new EmployeeResponseDto(               
