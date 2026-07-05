@@ -1,4 +1,4 @@
-﻿using Organization.Domain.Commons.Models;
+﻿using Organization.Domain.Commons.BaseEntity;
 using Organization.Infrastructure.Persistance.DataContext;
 
 namespace Organization.Application.Commons.Interfaces.Persistance.RepositoriesFactory

@@ -15,7 +15,7 @@ namespace Organization.Presentaion.API.Controllers.V1
     [ApiVersion("1.0")]  //specified version
     [ApiController]
     [Produces("application/json")]
-    public class CompaniesController : ControllerBase
+    public sealed class CompaniesController : BaseAPIController
     {
         private readonly IUnitOfWork _unitOfWork;
         //public IGenericRepository<Company> companyRepository;
@@ -39,9 +39,14 @@ namespace Organization.Presentaion.API.Controllers.V1
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyQueryParameters companyQueryParameters)
         {
             //var companies = await companyRepository.GetAsync(companyQueryParameters);
-            var companies = await _sender.Send(new GetCompaniesQuery(companyQueryParameters));
+            var result = await _sender.Send(new GetCompaniesQuery(companyQueryParameters));
 
-            return Ok(companies);
+            //return Ok(companies);
+            return result.Match(
+                    result => Ok(result),
+                    errors => GetProblemFromErrorsCollection(errors)
+            );
+
         }
 
         /// <summary>
@@ -52,13 +57,19 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <response code="404">Could not find the company.</response>
         /// <returns>Company</returns>
         [HttpGet("{id:length(22)}")]
-        public async Task<ActionResult<CompanyResponseDto>> GetCompanyById(string id, bool hasAssociatedObject = false)
-        {            
-            var company = await _sender.Send(new GetCompanyByIdQuery(id, hasAssociatedObject));
+        public async Task<IActionResult> GetCompanyById(string id, bool hasAssociatedObject = false)
+        {
+            //NOTE: we are now RETURNING  Task of type IActionResult instead of ActionResult<CompanyResponseDto>
+            //because we are now returning ErrorOr<CompanyResponseDto> from the GetCompanyByIdQueryHandler
+            var result = await _sender.Send(new GetCompanyByIdQuery(id, hasAssociatedObject));
 
-            return Ok(company);
+            //return Ok(result);
+            return result.Match(
+                r => Ok(r),
+                errors => GetProblemFromErrorsCollection(errors)
+            );
         }
-
+         
 
         /// <summary>
         /// This endpoint adds a company in the system.
@@ -80,9 +91,14 @@ namespace Organization.Presentaion.API.Controllers.V1
 
             // we call the ISender Send( )
             //string companyId = await _sender.Send(addCompanyCommand);
-            string companyId = await _sender.Send(mappedCompany);
+            var result = await _sender.Send(mappedCompany);
 
-            return CreatedAtAction(nameof(GetCompanyById), new { id = companyId }, companyRequestDto);
+            //return CreatedAtAction(nameof(GetCompanyById), new { id = companyId }, companyRequestDto);
+            return result.Match(
+                    result => Ok(result),
+                    errors => GetProblemFromErrorsCollection(errors)
+                    );
+
         }
 
         /// <summary>
@@ -99,9 +115,12 @@ namespace Organization.Presentaion.API.Controllers.V1
             //Mappings with Mapster: Map<TDestination>(TSource)
             var mappedCompany = _mapper.Map<UpdateCompanyCommand>((id, companyRequestDto));
 
-            await _sender.Send(mappedCompany);
+            var result = await _sender.Send(mappedCompany);
 
-            return CreatedAtAction(nameof(GetCompanyById), new { id }, companyRequestDto); 
+            return result.Match(
+                result => Ok(CreatedAtAction(nameof(GetCompanyById), new { id }, companyRequestDto)),
+                errors => GetProblemFromErrorsCollection(errors)
+            );            
         }
 
 
@@ -114,12 +133,13 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpDelete("{id:length(22)}")]
         public async Task<IActionResult> DeleteCompany(string id, bool isDeleteHasAssociations = false)
         {
-            await _sender.Send(new DeleteCompanyCommand(id, isDeleteHasAssociations));
+            var result = await _sender.Send(new DeleteCompanyCommand(id, isDeleteHasAssociations));
 
-            return Ok();
-
+            return result.Match(
+                result => Ok($"Successfully SoftDeleted Company with Id: {id}."),
+                errors => GetProblemFromErrorsCollection(errors)
+            );
         }
-
     }
 }
 

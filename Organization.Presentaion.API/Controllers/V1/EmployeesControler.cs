@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Organization.Application.Commons.CQRS.EmployeeModule.Commands;
 using Organization.Application.Commons.CQRS.EmployeeModule.Queries;
 using Organization.Application.Commons.DTOs;
-using Organization.Application.Commons.Exceptions;
+using Organization.Application.Commons.CustomizedExceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
 using Organization.Domain.Company.Models;
@@ -17,7 +17,8 @@ namespace Organization.Presentaion.API.Controllers.V1
     [Route("api/v{v:apiVersion}/[controller]")] //setup for URI API Versioning
     [ApiVersion("1.0")]  //specified version
     [ApiController]
-    public class EmployeesController : ControllerBase
+    [Produces("application/json")]
+    public sealed class EmployeesController : BaseAPIController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISender _sender;

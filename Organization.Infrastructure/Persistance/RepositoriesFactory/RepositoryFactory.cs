@@ -1,6 +1,6 @@
 ﻿using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Interfaces.Persistance.RepositoriesFactory;
-using Organization.Domain.Commons.Models;
+using Organization.Domain.Commons.BaseEntity;
 using Organization.Infrastructure.Persistance.DataContext;
 using Organization.Infrastructure.Persistance.Repositories;
 

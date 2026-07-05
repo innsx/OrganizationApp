@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Organization.Application.Commons.Exceptions;
+using Organization.Application.Commons.CustomizedExceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
 
 namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
@@ -19,7 +19,7 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
             if (employeeToUpdate == null)
             {
-                throw new NotFoundException($"Employee with id = {request.Id} is NOT found.");
+                throw new EmployeeNotFoundException($"Employee with id = {request.Id} is NOT found.");
             }
           
             employeeToUpdate.Name = request.Name;

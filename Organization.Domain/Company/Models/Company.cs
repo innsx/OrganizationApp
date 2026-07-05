@@ -1,4 +1,4 @@
-﻿using Organization.Domain.Commons.Models;
+﻿using Organization.Domain.Commons.BaseEntity;
 using Organization.Domain.Commons.Utilities;
 using Organization.Domain.Employees.Models;
 

@@ -1,7 +1,7 @@
 ﻿using Organization.Application.Commons.Interfaces;
 using System.Net;
 
-namespace Organization.Application.Commons.Exceptions
+namespace Organization.Application.Commons.CustomizedExceptions
 {
     public sealed class DuplicateNameException : Exception, IApplicationException
     {

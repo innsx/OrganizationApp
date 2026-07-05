@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Organization.Application.Commons.Interfaces.Persistance;
-using Organization.Domain.Commons.Models;
+using Organization.Domain.Commons.BaseEntity;
 using Organization.Domain.Commons.Utilities;
 using Organization.Infrastructure.Persistance.DataContext;
 using System.Data;

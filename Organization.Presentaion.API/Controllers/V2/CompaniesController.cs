@@ -12,7 +12,7 @@ namespace Organization.Presentaion.API.Controllers.V2
     [ApiVersion("2.0")]  //specified version
     [ApiController]
     [Produces("application/json")]
-    public class CompaniesController : ControllerBase
+    public class CompaniesController : BaseAPIController
     {
         private readonly IUnitOfWork _unitOfWork;
         //public IGenericRepository<Company> companyRepository;

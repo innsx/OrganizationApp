@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Organization.Application.Commons.DTOs;
-using Organization.Application.Commons.Exceptions;
+using Organization.Application.Commons.CustomizedExceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Domain.Employees.Models;
 

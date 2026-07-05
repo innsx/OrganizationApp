@@ -1,10 +1,14 @@
-﻿using MediatR;
-using Organization.Application.Commons.Exceptions;
+﻿using ErrorOr;
+using MediatR;
+using Organization.Application.Commons.CustomizedExceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
+using Organization.Domain.Commons.Errors;
 
 namespace Organization.Application.Commons.CQRS.CompanyModule.Commands
 {
-    public sealed class DeleteCompanyCommandHandler : IRequestHandler<DeleteCompanyCommand>
+    //MediatR.Unit Represent a VOID type, since VOID is not a VALID return type in C#.
+    // we use "Unit" to represent a VOID return type in MediatR.
+    public sealed class DeleteCompanyCommandHandler : IRequestHandler<DeleteCompanyCommand, ErrorOr<Unit>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -13,7 +17,7 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Commands
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Handle(DeleteCompanyCommand request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<Unit>> Handle(DeleteCompanyCommand request, CancellationToken cancellationToken)
         {
             var companyToSoftDelete = await _unitOfWork.Companies.GetByIdAsync(request.Id);
             //var companyToSoftDelete = await companyRepository.GetByIdAsync(id);
@@ -23,7 +27,10 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Commands
                 //return NotFound($"Company with Id: {id} not found.");
 
                 //add this line
-                throw new NotFoundException($"The system does not have any Company with id = {request.Id}");
+                //throw new CompanyNotFoundException($"The system does not have any Company with id = {request.Id}");
+                var errorMessage = Errors.Company.CompanyFailToDelete($"Company with id: {request.Id} failed to SoftDelete.");
+
+                return errorMessage;
             }
 
             _unitOfWork.OpenConnectionAndBeginDbTransaction();
@@ -32,6 +39,10 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Commands
             //await companyRepository.SoftDeleteAsync(id, isSoftDeleteRecordHasRelatedChildTableColumn);
 
             _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
+
+            //since we CANNOT USE VOID as a RETURN type, we returns "Unit"
+            return Unit.Value;  //returns Unit.Value as a VOID
+
 
             //if (request.isDeleteHasAssociations == true)
             //{

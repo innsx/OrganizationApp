@@ -1,4 +1,4 @@
-﻿using Organization.Domain.Commons.Models;
+﻿using Organization.Domain.Commons.BaseEntity;
 
 namespace Organization.Application.Commons.Interfaces.Persistance
 {

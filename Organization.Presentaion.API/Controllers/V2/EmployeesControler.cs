@@ -12,7 +12,7 @@ namespace Organization.Presentaion.API.Controllers.V2
     [Route("api/v{v:apiVersion}/[controller]")] //setup for URI API Versioning
     [ApiVersion("2.0")]  //specified version
     [ApiController]
-    public class EmployeesController : ControllerBase
+    public class EmployeesController : BaseAPIController
     {
         private readonly IUnitOfWork _unitOfWork;
 

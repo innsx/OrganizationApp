@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Organization.Application.Commons.Exceptions;
+using Organization.Application.Commons.CustomizedExceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
 
 namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
@@ -20,7 +20,7 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
             if (employeeToDelete == null)
             {
                 //add this line
-                throw new NotFoundException($"The system does not have any Employee with id = {request.Id}");
+                throw new EmployeeNotFoundException($"The system does not have any Employee with id = {request.Id}");
             }
 
             if (request.isDeleteHasAssociations is true)

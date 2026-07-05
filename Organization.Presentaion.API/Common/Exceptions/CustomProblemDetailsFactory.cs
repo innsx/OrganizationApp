@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
+using Organization.Application.Commons.Utilities;
 using System.Diagnostics;
+using Organization.Domain.Commons.Errors;
+using ErrorOr;
 
 namespace Organization.Presentaion.API.Common.Exceptions
 {
@@ -94,6 +97,19 @@ namespace Organization.Presentaion.API.Common.Exceptions
 
             //added customized error property
             problemDetails.Extensions.Add("CustomProperty", "Custom Property value");
+
+
+            //var errors = httpContext?.Items["errors"] as List<Error>;
+
+            // Add error codes to the problem details extensions if they exist in the HttpContext items
+            // This assumes that the errors are stored in the HttpContext items
+            // under a specific key using GlobalConstants.Errors and that they are of type List<Error>. 
+            var errors = httpContext?.Items[GlobalConstants.Errors] as List<Error>;
+
+            if (errors is not null)
+            {
+                problemDetails.Extensions.Add("errorCodes", errors.Select(x => x.Code));
+            }
 
             _configure?.Invoke(new() { HttpContext = httpContext!, ProblemDetails = problemDetails });
         }

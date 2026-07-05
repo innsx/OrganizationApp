@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Organization.Application.Commons.DTOs;
-using Organization.Application.Commons.Exceptions;
+using Organization.Application.Commons.CustomizedExceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
 
 namespace Organization.Application.Commons.CQRS.EmployeeModule.Queries
@@ -24,7 +24,7 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Queries
                 //return NotFound(employee);
 
                 //add this line
-                throw new NotFoundException($"The system does not have any Employee with id = {request.id}");
+                throw new EmployeeNotFoundException($"The system does not have any Employee with id = {request.id}");
             }
 
             return new EmployeeResponseDto(               

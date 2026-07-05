@@ -1,8 +1,11 @@
-﻿using MediatR;
+﻿using ErrorOr;
+using MediatR;
 using Organization.Application.Commons.DTOs;
 
 namespace Organization.Application.Commons.CQRS.CompanyModule.Commands
 {
     //RECORDS are immutable -- ONCE CREATED, RECORD CANNOT BE MODIFIED/UPDATED
-    public record AddCompanyCommand(string Name, string Address, string Country) : IRequest<string>;
+    //MediatR.Unit Represent a VOID type, since VOID is not a VALID return type in C#.
+    // we use "Unit" to represent a VOID return type in MediatR.
+    public record AddCompanyCommand(string Name, string Address, string Country) : IRequest<ErrorOr<Unit>>;
 }

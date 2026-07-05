@@ -1,4 +1,4 @@
-﻿namespace Organization.Domain.Commons.Models
+﻿namespace Organization.Domain.Commons.BaseEntity
 {
     public interface IDbEntity
     {
