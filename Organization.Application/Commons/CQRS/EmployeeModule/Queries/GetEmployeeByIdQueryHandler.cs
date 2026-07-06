@@ -22,13 +22,17 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Queries
 
             if (employee == null)
             {
-                //1st approach: commented this line
+                //1st approach: use the NotFound() method in the controller to return a 404 response
+                //(but this is not recommended because it will tightly couple
+                //the handler with the controller)
                 //return NotFound(employee);
 
-                //2nd approach: Throw customized exception
+                //2nd approach: creating a customized exception
+                //then throw an error and catch it in the global exception handler middleware (in Program.cs)
                 //throw new EmployeeNotFoundException($"The system does not have any Employee with id = {request.id}");
 
-                //3rd approach: using ErrorOr                            
+                //3rd approach: create an error message in ErrorOr format
+                //and return it to the controller class                       
                 var errorMessage = Errors.Employee.EmployeeDoesNotExist($"The system does not have any Employee with Id: ${request.id}");
 
                 return errorMessage;

@@ -24,12 +24,18 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Commands
 
             if (companyToSoftDelete is null)
             {
+                //1st approach: use the NotFound() method in the controller to return a 404 response
+                //(but this is not recommended because it will tightly couple
+                //the handler with the controller)
                 //return NotFound($"Company with Id: {id} not found.");
 
-                //add this line
+                //2nd approach: creating a customized exception
+                //and throwing it to the controller class
                 //throw new CompanyNotFoundException($"The system does not have any Company with id = {request.Id}");
-                var errorMessage = Errors.Company.CompanyFailToDelete($"Company with id: {request.Id} failed to SoftDelete.");
 
+                //3rd approach: create an error message in ErrorOr format
+                //and return it to the controller class
+                var errorMessage = Errors.Company.CompanyFailToDelete($"Company with id: {request.Id} failed to SoftDelete.");
                 return errorMessage;
             }
 

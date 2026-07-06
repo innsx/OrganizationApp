@@ -24,13 +24,21 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Commands
 
             if (isCompanyRequestedExisted is true)
             {
+                //1st approach: use the Conflict() method in the controller to return a 409 response
+                //(but this is not recommended because it will tightly couple
+                //the handler with the controller)
                 //WILL RETURN STATUSCODE: 409 conflict if Name existed
-                //return Conflict(companyRequestDto);
+                //return Conflict(addCompanyRequestDto);
 
-                //add this line and use DuplicateCompanyException with pass-in specified Company Name if Name is NOT UNIQUE
+                //2nd approach: creating a customized exception
+                //and throwing it to the controller class                
                 //throw new DuplicateNameException($"Company with Name {addCompanyRequest.Name} is ALREADY EXISTED.");
 
-                return Errors.Company.DuplicateCompany($"Company with Name {addCompanyRequest.Name} is ALREADY EXISTED.");
+                //3rd approach: use the NotFound() method in the controller to return a 404 response
+                //(but this is not recommended because it will tightly couple
+                //the handler with the controller)
+                var errorMessage = Errors.Company.DuplicateCompany($"Company with Name {addCompanyRequest.Name} is ALREADY EXISTED.");
+                return errorMessage;
             }
              
             _unitOfWork.OpenConnectionAndBeginDbTransaction();

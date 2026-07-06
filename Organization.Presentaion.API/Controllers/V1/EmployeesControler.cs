@@ -44,6 +44,15 @@ namespace Organization.Presentaion.API.Controllers.V1
         {
             var result = await _sender.Send(new GetEmployeesQuery(employeeQueryParameters));
 
+            if (!result.Value.Items.Any()  && employeeQueryParameters.FilterBy is not null)
+            {
+                return NotFound(new EmployeeNullResponseDto
+                {
+                    StatusCode = 404,
+                    Message = "Your filtering return no results. Please check your filtering parameters and try again.",
+                });
+            }
+
             return result.Match(
                 result => Ok(result),
                 errors => GetProblemFromErrorsCollection(errors)
@@ -60,6 +69,8 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpGet("{id:length(22)}")]
         public async Task<IActionResult> GetEmployeeById(string id) //bool hasAssociatedObject = false
         {
+            //NOTE: we are now RETURNING  Task of type IActionResult instead of ActionResult<EmployeeResponseDto>
+            //because we are now returning ErrorOr<EmployeeResponseDto> from the GetEmployeeByIdQueryHandler
             var result = await _sender.Send(new GetEmployeeByIdQuery(id));
 
             return result.Match(
@@ -77,7 +88,6 @@ namespace Organization.Presentaion.API.Controllers.V1
         public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeRequestDto addEmployeeRequestDto)
         {
             //var employeeId = await _sender.Send(new AddEmployeeCommand(addEmployeeRequestDto));
-
             //return Ok(CreatedAtAction(nameof(GetEmployeeById), new {id = employeeId}, addEmployeeRequestDto));
 
              var result = await _sender.Send(new AddEmployeeCommand(addEmployeeRequestDto));
@@ -110,7 +120,7 @@ namespace Organization.Presentaion.API.Controllers.V1
             //    employeeRequestDto.CompanyId
             //    ));
 
-            //using MapsterMapper to map the EmployeeRequestDto to UpdateEmployeeCommand
+            //using MapsterMapper to map Source: EmployeeRequestDto to Destination: UpdateEmployeeCommand
             var mappedEmployee = _mapper.Map<UpdateEmployeeCommand>((id, updateEmployeeRequestDto));
 
             var result = await _sender.Send(mappedEmployee);

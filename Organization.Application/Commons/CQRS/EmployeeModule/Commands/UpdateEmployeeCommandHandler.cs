@@ -2,6 +2,7 @@
 using MediatR;
 using Organization.Application.Commons.CustomizedExceptions;
 using Organization.Application.Commons.Interfaces.Persistance;
+using Organization.Domain.Commons.Errors;
 
 namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 {
@@ -20,13 +21,18 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
             if (employeeToUpdate == null)
             {
-                //1st approach: return an error
+                //1st approach: use the NotFound() method in the controller to return a 404 response
+                //(but this is not recommended because it will tightly couple
+                //the handler with the controller)
+                //return NotFound("employee is not found.");
+
+                //2nd approach: creating a customized exception
+                //then throw an error and catch it in the global exception handler middleware (in Program.cs)
                 //throw new EmployeeNotFoundException($"Employee with id = {request.Id} is NOT found.");
 
-                //2nd approach: using ErrorOr & returns customized error
-                return Error.NotFound(
-                    code: "Employee.NotFound",
-                    description: $"Employee with id = {request.Id} is NOT found.");
+                //3rd approach: create an error message in ErrorOr format
+                //and return it to the controller class  
+                return Errors.Employee.EmployeeDoesNotExist($"Employee with id = {request.Id} does not existed.");
             }
           
             employeeToUpdate.Name = request.Name;

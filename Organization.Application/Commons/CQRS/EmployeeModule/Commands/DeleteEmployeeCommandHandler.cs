@@ -21,11 +21,17 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
             if (employeeToDelete == null)
             {
-                //1st approach: throw an error
+                //1st approach: use the NotFound() method in the controller to return a 404 response
+                //(but this is not recommended because it will tightly couple
+                //the handler with the controller)
+                //return NotFound("employee is not found.");
+
+                //2nd approach: creating a customized exception
+                //then throw an error and catch it in the global exception handler middleware (in Program.cs)
                 //throw new EmployeeNotFoundException($"The system does not have any Employee with id = {request.Id}");
 
-                //2nd approach: return a customized error
-
+                //3rd approach: create an error message in ErrorOr format
+                //and return it to the controller class
                 return Errors.Employee.EmployeeDoesNotExist($"The system does not have any Employee with id = {request.Id}"); 
             }
 

@@ -7,6 +7,7 @@ using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
 using Organization.Domain.Company;
+using Organization.Domain.Employees;
 
 namespace Organization.Presentaion.API.Controllers.V1
 {
@@ -41,7 +42,15 @@ namespace Organization.Presentaion.API.Controllers.V1
             //var companies = await companyRepository.GetAsync(companyQueryParameters);
             var result = await _sender.Send(new GetCompaniesQuery(companyQueryParameters));
 
-            //return Ok(companies);
+            if (!result.Value.Items.Any() && companyQueryParameters.FilterBy is not null)
+            {
+                return NotFound(new CompanyNullResponseDto
+                {
+                    StatusCode = 404,
+                    Message = "Your filtering return no results. Please check your filtering parameters and try again.",
+                });
+            }
+
             return result.Match(
                     result => Ok(result),
                     errors => GetProblemFromErrorsCollection(errors)

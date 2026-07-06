@@ -23,10 +23,20 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Commands
 
             if (updateCompany is null)
             {
+                //1st approach: use the NotFound() method in the controller to return a 404 response
+                //(but this is not recommended because it will tightly couple
+                //the handler with the controller)
+                //return NotFound("company is not found.");
+
+
+                //2nd approach: creating a customized exception
+                //and throwing it to the controller class
                 //throw new CompanyNotFoundException($"The system does not have any company with id={request.Id}");
+
+                //3rd approach: create an error message in ErrorOr format
+                //and return it to the controller class
                 var errorMessage = Errors.Company.CompanyDoestNotExist($"The system does not have any company with id = {request.Id}");
                 return errorMessage;
-
             }
 
             _unitOfWork.OpenConnectionAndBeginDbTransaction();

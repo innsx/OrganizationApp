@@ -23,9 +23,17 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
             if (employeeNameIsExisted is true)
             {
-                //add this line and use DuplicateCompanyException with pass-in specified Company Name if Name is NOT UNIQUE
+                //1st approach: use the Conflict() method in the controller to return a 409 response
+                //(but this is not recommended because it will tightly couple
+                //the handler with the controller)
+                //return Conflict(employee);
+
+                //2nd approach: creating a customized exception
+                //then throw an error and catch it in the global exception handler middleware (in Program.cs)
                 //throw new DuplicateNameException($"Employee with Name {request.employeeRequestDto.Name} is ALREADY EXISTED.");
 
+                //3rd approach: create an error message in ErrorOr format
+                //and return it to the controller class  
                 return Errors.Employee.DuplicateEmployee(request.employeeRequestDto.Name);
             }
 

@@ -20,10 +20,20 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Queries
         {            
             var requestCompany = await _unitOfWork.Companies.GetByIdAsync(request.Id);
 
-            //3rd approach
+            
             if (requestCompany is null)
             {
-                //using ErrorOr
+                //1st approach: use the NotFound() method in the controller to return a 404 response
+                //(but this is not recommended because it will tightly couple
+                //the handler with the controller)
+                //return NotFound(employee);
+
+                //2nd approach: creating a customized exception
+                //and throwing it to the controller class
+                //throw new CompanyNotFoundException($"The system does not have any company by Id: {request.Id}");
+
+                //3rd approach: create an error message in ErrorOr format
+                //and return it to the controller class
                 var errorMessage = Errors.Company.CompanyDoestNotExist($"The system does not have any company with id = {request.Id}");
 
                 return errorMessage;
@@ -33,7 +43,7 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Queries
 
         }
     }
-}
+} 
 
 
 
