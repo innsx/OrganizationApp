@@ -19,7 +19,7 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
         public async Task<ErrorOr<Unit>> Handle(AddEmployeeCommand request, CancellationToken cancellationToken)
         {
-            var employeeNameIsExisted = await _unitOfWork.Employees.IsExistingAsync(request.employeeRequestDto.Name);
+            var employeeNameIsExisted = await _unitOfWork.Employees.IsExistingAsync(request.Name);
 
             if (employeeNameIsExisted is true)
             {
@@ -34,7 +34,7 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
                 //3rd approach: create an error message in ErrorOr format
                 //and return it to the controller class  
-                return Errors.Employee.DuplicateEmployee(request.employeeRequestDto.Name);
+                return Errors.Employee.DuplicateEmployee(request.Name);
             }
 
             _unitOfWork.OpenConnectionAndBeginDbTransaction();
@@ -42,12 +42,12 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
             var employeeId = await _unitOfWork.Employees.AddAsnyc(
                 new Employee
                 {
-                    Name = request.employeeRequestDto.Name,
-                    Age = request.employeeRequestDto.Age,
-                    Position = request.employeeRequestDto.Position,
-                    Salary = request.employeeRequestDto.Salary,
+                    Name = request.Name,
+                    Age = request.Age,
+                    Position = request.Position,
+                    Salary = request.Salary,
                     CreatedOn = DateTime.Now,
-                    CompanyId = request.employeeRequestDto.CompanyId
+                    CompanyId = request.CompanyId
                 }
             );
 
@@ -55,7 +55,6 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
             //return employeeId;
             return Unit.Value;
-
         }
     }
 }

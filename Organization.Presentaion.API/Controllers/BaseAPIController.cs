@@ -22,9 +22,9 @@ namespace Organization.Presentaion.API.Controllers
             //check if EACH error type is a "VALIDATION" type
             if (errors.All(error => error.Type == ErrorType.Validation))
             {
-                //ActionResult ControllerBase.ValidationProblem()
+                //if All errors are of type "Validation",
+                //then add each error to ModelStateDictionary & return ValidationProblem(ModelStateDictionary)
                 return AddEachErrorToModelStateDictionary(errors);
-                //create ActionResult that produce a StatusCode such as StatusCode400BadRequest for Validation
             }
 
             //else get & set key/value errors collection of HttpContext.Items named "errors"

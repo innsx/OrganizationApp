@@ -7,6 +7,6 @@ using Organization.Domain.Company;
 
 namespace Organization.Application.Commons.CQRS.CompanyModule.Queries
 {
-    public record GetCompaniesQuery(CompanyQueryParameters queryParameters): IRequest<ErrorOr<PageList<CompanyResponseDto>>>;
+    public record GetCompaniesQuery(CompanyQueryParameters queryParameters): IRequest<PageList<CompanyResponseDto>>;
    
 }

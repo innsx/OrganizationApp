@@ -7,7 +7,7 @@ using Organization.Domain.Company;
 
 namespace Organization.Application.Commons.CQRS.CompanyModule.Queries
 {
-    public sealed class GetCompaniesQueryHandler : IRequestHandler<GetCompaniesQuery, ErrorOr<PageList<CompanyResponseDto>>>
+    public sealed class GetCompaniesQueryHandler : IRequestHandler<GetCompaniesQuery, PageList<CompanyResponseDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -16,7 +16,7 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Queries
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ErrorOr<PageList<CompanyResponseDto>>> Handle(GetCompaniesQuery request, CancellationToken cancellationToken)
+        public async Task<PageList<CompanyResponseDto>> Handle(GetCompaniesQuery request, CancellationToken cancellationToken)
         {
             var companies = await _unitOfWork.Companies.GetCompaniesByQueryAsync(request.queryParameters);
 

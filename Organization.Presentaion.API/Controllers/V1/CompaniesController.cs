@@ -41,21 +41,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         {
             //var companies = await companyRepository.GetAsync(companyQueryParameters);
             var result = await _sender.Send(new GetCompaniesQuery(companyQueryParameters));
-
-            if (!result.Value.Items.Any() && companyQueryParameters.FilterBy is not null)
-            {
-                return NotFound(new CompanyNullResponseDto
-                {
-                    StatusCode = 404,
-                    Message = "Your filtering return no results. Please check your filtering parameters and try again.",
-                });
-            }
-
-            return result.Match(
-                    result => Ok(result),
-                    errors => GetProblemFromErrorsCollection(errors)
-            );
-
+            return Ok(result);
         }
 
         /// <summary>

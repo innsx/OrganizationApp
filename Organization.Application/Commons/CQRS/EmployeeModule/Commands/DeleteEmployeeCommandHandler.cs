@@ -17,7 +17,7 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
         public async Task<ErrorOr<Unit>> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
         {
-            var employeeToDelete = await _unitOfWork.Employees.GetByIdAsync(request.Id);
+            var employeeToDelete = await _unitOfWork.Employees.GetByIdAsync(request.id);
 
             if (employeeToDelete == null)
             {
@@ -32,12 +32,12 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
                 //3rd approach: create an error message in ErrorOr format
                 //and return it to the controller class
-                return Errors.Employee.EmployeeDoesNotExist($"The system does not have any Employee with id = {request.Id}"); 
+                return Errors.Employee.EmployeeDoesNotExist($"The system does not have any Employee with id = {request.id}"); 
             }
 
             if (request.isDeleteHasAssociations is true)
             {
-                throw new InvalidOperationException($"The Employee with id = {request.Id} has associated records and cannot be deleted.");
+                throw new InvalidOperationException($"The Employee with id = {request.id} has associated records and cannot be deleted.");
             }
             else
             {
@@ -46,7 +46,7 @@ namespace Organization.Application.Commons.CQRS.EmployeeModule.Commands
 
                 _unitOfWork.OpenConnectionAndBeginDbTransaction();
 
-                await _unitOfWork.Employees.SoftDeleteAsync(request.Id, isDeleteEmployeeHasAssociation);
+                await _unitOfWork.Employees.SoftDeleteAsync(request.id, isDeleteEmployeeHasAssociation);
 
                 _unitOfWork.CommitDbTransactionDisposeAndCloseConnectionDispose();
 

@@ -6,5 +6,5 @@ using Organization.Domain.Employees;
 
 namespace Organization.Application.Commons.CQRS.EmployeeModule.Queries
 {
-    public record GetEmployeesQuery(EmployeeQueryParameters employeeQueryParameters) : IRequest<ErrorOr<PageList<EmployeeResponseDto>>>;
+    public record GetEmployeesQuery(EmployeeQueryParameters employeeQueryParameters) : IRequest<PageList<EmployeeResponseDto>>;
 }

@@ -44,19 +44,20 @@ namespace Organization.Presentaion.API.Controllers.V1
         {
             var result = await _sender.Send(new GetEmployeesQuery(employeeQueryParameters));
 
-            if (!result.Value.Items.Any()  && employeeQueryParameters.FilterBy is not null)
-            {
-                return NotFound(new EmployeeNullResponseDto
-                {
-                    StatusCode = 404,
-                    Message = "Your filtering return no results. Please check your filtering parameters and try again.",
-                });
-            }
+            return Ok(result);
+            //if (!result.Value.Items.Any()  && employeeQueryParameters.FilterBy is not null)
+            //{
+            //    return NotFound(new EmployeeNullResponseDto
+            //    {
+            //        StatusCode = 404,
+            //        Message = "Your filtering return no results. Please check your filtering parameters and try again.",
+            //    });
+            //}
 
-            return result.Match(
-                result => Ok(result),
-                errors => GetProblemFromErrorsCollection(errors)
-                );
+            //return result.Match(
+            //    result => Ok(result),
+            //    errors => GetProblemFromErrorsCollection(errors)
+            //    );
         }
 
         /// <summary>
@@ -90,10 +91,12 @@ namespace Organization.Presentaion.API.Controllers.V1
             //var employeeId = await _sender.Send(new AddEmployeeCommand(addEmployeeRequestDto));
             //return Ok(CreatedAtAction(nameof(GetEmployeeById), new {id = employeeId}, addEmployeeRequestDto));
 
-             var result = await _sender.Send(new AddEmployeeCommand(addEmployeeRequestDto));
+            var mappedEmployee = _mapper.Map<AddEmployeeCommand>(addEmployeeRequestDto);
+
+            var result = await _sender.Send(mappedEmployee);
 
             return result.Match(
-                result => Ok(CreatedAtAction(nameof(GetEmployeeById), new { id = result }, addEmployeeRequestDto)),
+                result => Ok(result),
                 errors => GetProblemFromErrorsCollection(errors)
                 );
         }
