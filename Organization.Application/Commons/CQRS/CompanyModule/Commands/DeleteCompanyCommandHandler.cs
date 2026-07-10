@@ -35,7 +35,8 @@ namespace Organization.Application.Commons.CQRS.CompanyModule.Commands
 
                 //3rd approach: create an error message in ErrorOr format
                 //and return it to the controller class
-                var errorMessage = Errors.Company.CompanyFailToDelete($"Company with id: {request.Id} failed to SoftDelete.");
+                //var errorMessage = Errors.Company.CompanyFailToDelete($"Company with id: {request.Id} failed to SoftDelete.");
+                var errorMessage = Errors.Company.CompanyDoestNotExist($"Company with id: {request.Id} does not existed.");
                 return errorMessage;
             }
 
