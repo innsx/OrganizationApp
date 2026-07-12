@@ -200,7 +200,7 @@ namespace Organization.Infrastructure.Persistance.Repositories
             return;
         }
 
-        //ExecuteScalarAsync	Returns the first column of the first row as a dynamic type asynchronously
+        //ExecuteScalarAsync() returns the first column of the first row as a dynamic type asynchronously
     }
 }
 

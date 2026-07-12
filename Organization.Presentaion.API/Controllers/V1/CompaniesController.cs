@@ -19,15 +19,20 @@ namespace Organization.Presentaion.API.Controllers.V1
     public sealed class CompaniesController : BaseAPIController
     {
         private readonly IUnitOfWork _unitOfWork;
+
+        //initializing a repository of the type IGenericRepository<TEntity>
         //public IGenericRepository<Company> companyRepository;
+
         private readonly ISender _sender;
         private readonly IMapper _mapper;
 
         public CompaniesController(IUnitOfWork unitOfWork, ISender sender, IMapper mapper)
         {
-            _unitOfWork = unitOfWork;
+            //_unitOfWork = unitOfWork;
             _sender = sender;
             _mapper = mapper;
+
+            //using the FACTORY REPOSITORY pattern,
             //companyRepository = _unitOfWork.RepositoryFactory<Company>();
         }
 
@@ -39,7 +44,11 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpGet]
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyQueryParameters companyQueryParameters)
         {
+            //if we were using the FACTORY REPOSITORY pattern,
+            //we would have called the GetAsync method of the companyRepository
+            //to get the companies based on the query parameters.
             //var companies = await companyRepository.GetAsync(companyQueryParameters);
+
             var result = await _sender.Send(new GetCompaniesQuery(companyQueryParameters));
             return Ok(result);
         }
@@ -55,10 +64,9 @@ namespace Organization.Presentaion.API.Controllers.V1
         public async Task<IActionResult> GetCompanyById(string id, bool hasAssociatedObject = false)
         {
             //NOTE: we are now RETURNING  Task of type IActionResult instead of ActionResult<CompanyResponseDto>
-            //because we are now returning ErrorOr<CompanyResponseDto> from the GetCompanyByIdQueryHandler
+            //because we are now returning ErrorOr<CompanyResponseDto> the GetCompanyByIdQueryHandler
             var result = await _sender.Send(new GetCompanyByIdQuery(id, hasAssociatedObject));
 
-            //return Ok(result);
             return result.Match(
                 r => Ok(r),
                 errors => GetProblemFromErrorsCollection(errors)
@@ -74,8 +82,8 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpPost]
         public async Task<IActionResult> AddCompany([FromBody] CompanyRequestDto companyRequestDto)
         {
-            //note: this is manually mapping CompanyRequestDto properties into AddCompanyCommand properties
-            //later on, we will use Mapster to do AUTO mapping
+            //note: this is manually mapping SOURCE CompanyRequestDto properties
+            //  to DESTINATION AddCompanyCommand properties
             //var addCompanyCommand = new AddCompanyCommand(companyRequestDto.Name, 
             //                                            companyRequestDto.Address, 
             //                                            companyRequestDto.Country);
@@ -105,8 +113,6 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpPut("{id:length(22)}")]
         public async Task<IActionResult> UpdateCompany(string id, [FromBody] CompanyRequestDto companyRequestDto)
         {
-            //await _sender.Send(new UpdateCompanyCommand(id, companyRequestDto.Name, companyRequestDto.Address, companyRequestDto.Country));
-
             //Mappings with Mapster: Map<TDestination>(TSource)
             var mappedCompany = _mapper.Map<UpdateCompanyCommand>((id, companyRequestDto));
 

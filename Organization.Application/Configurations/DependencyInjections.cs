@@ -19,14 +19,20 @@ namespace Organization.Application.Configurations
                 //and pipeline behaviors with the built-in .NET dependency injection container
                 config.RegisterServicesFromAssembly(typeof(DependencyInjections).Assembly);
             });
-
-            //REGISTERING the TYPE: IPipelineBehavior & IMPEMENTATION TYPE:ValidationPipelineBehaviour
-            //since in ValidationPipelineBehaviour.cs class, we are using GENERIC 
-            //here we need to specifie Generic Type Parameter "<,>"
+             
+            //tutorial: https://dotnettutorials.net/lesson/fluent-api-async-validators-in-asp-net-core-web-api/
+            //REGISTERING A GENERIC VALIDATION CLASS 
+            // ValidationPipelineBehaviour<TRequest, TResponse>
+            //THAT IMPLEMENTS IPipelineBehavior INTERFACE
+            //we are using GENERIC class here, so we need to specify the Generic Type Parameter "<,>"
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehaviour<,>));
 
+            // IF Registering Each Validator Manually
+            //builder.Services.AddScoped<IValidator<ProductDTO>, ProductDTOValidator>();
+            //builder.Services.AddScoped<IValidator<CustomerDTO>, CustomerDTOValidator>();
+
             //Using Reflection, we Registering all Validators which are available
-            // within current running Assembly
+            // in this DependencyInjections class & within current running Assembly 
             services.AddValidatorsFromAssembly(typeof(DependencyInjections).Assembly);
 
             return services;

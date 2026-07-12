@@ -8,8 +8,13 @@ namespace Organization.Infrastructure.Persistance
 {
     public class UnitOfWork : IUnitOfWork
     {
+        //NOTE: We are not using the RepositoryFactory to create repositories here,
         public ICompanyRepository Companies { get; private set; }
         public IEmployeeRepository Employees { get; private set; }
+
+        //If we were using the FACTORY REPOSITORY pattern,
+        //we would have a private field for the IRepositoryFactory
+        //& COMMENTED out the 2 repository properties above
         //private readonly IRepositoryFactory _repositoryFactory;
 
         //specified boolean _isDisposed to 'false'
@@ -20,17 +25,35 @@ namespace Organization.Infrastructure.Persistance
         {
             _dapperDataContext = dapperDataContext;
 
-            // RepositoryFactory is injected
-            //_repositoryFactory = repositoryFactory;
 
             InitailizeRepositories();
+
+            //IF we were using the FACTORY REPOSITORY pattern,
+            //we would have initialized the repositories here
+            // and COMMENTED OUT the InitailizeRepositories() method call above
+            // RepositoryFactory is injected
+            //_repositoryFactory = repositoryFactory;
         }
 
         private void InitailizeRepositories()
         {
+            //NOTE: We are creating repositories by directly instantiating them here,
+            //rather than using a factory.
             Companies = new CompanyRepository(_dapperDataContext);
             Employees = new EmployeeRepository(_dapperDataContext);
         }
+
+
+        //In C#, where T : IDbEntity is a generic type constraint.
+        //It restricts the generic placeholder T so that it can only represent classes or structs
+        //that implement the IDbEntity interface
+
+        //NOTE: If we were using the FACTORY REPOSITORY pattern, we would UNCOMMENTED this method below
+        //public IGenericRepository<TEntity> RepositoryFactory<TEntity>() where TEntity : IDbEntity
+        //{
+        //    return _repositoryFactory.CreateRepository<TEntity>(_dapperDataContext);
+        //}
+
 
         public void OpenConnectionAndBeginDbTransaction()
         {
@@ -86,15 +109,6 @@ namespace Organization.Infrastructure.Persistance
             _dapperDataContext.Transaction?.Dispose();
             _dapperDataContext.Transaction = null;
         }
-
-
-        //In C#, where T : IDbEntity is a generic type constraint.
-        //It restricts the generic placeholder T so that it can only represent classes or structs
-        //that implement the IDbEntity interface
-        //public IGenericRepository<TEntity> RepositoryFactory<TEntity>() where TEntity : IDbEntity
-        //{
-        //    return _repositoryFactory.CreateRepository<TEntity>(_dapperDataContext);
-        //}
     }
 }
 

@@ -32,24 +32,24 @@ namespace Organization.Application.Commons.PipelineBehaviours
                 await next();
             }
 
-            //if _validator is NOT NULL, we validate the _validator FIELD
+            //if _validator is NOT NULL, we validate the ''request object'' FIELDs
             var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
 
             // -------------- AFTER the HANDLER is executed, we check validationResult IsValid ---------------------
-            if (validationResult.IsValid == true)
+            if (validationResult.IsValid is true)
             {
                 return await next(); // Proceed to the next middleware/handler
             }
 
-            //converting all validations into ERRORS
+            //converting all validationResults into Errors
             var errors = validationResult.Errors
-                                         .ConvertAll(
-                                            ValidationFailure => Error.Validation(
-                                                    code: ValidationFailure.ErrorCode ?? ValidationFailure.PropertyName,
-                                                    description: ValidationFailure.ErrorMessage
-                                            )
-                                         );
+                            .ConvertAll(
+                                ValidationFailure => Error.Validation(
+                                    code: ValidationFailure.ErrorCode ?? ValidationFailure.PropertyName,
+                                    description: ValidationFailure.ErrorMessage
+                                )
+                            );
 
             //Option 1: Return a new instance of TResponse with the errors
             //return (TResponse)Activator.CreateInstance(typeof(TResponse), errors)!;
