@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.Extensions.Configuration;
 using Organization.Application.Commons.Utilities;
 using Organization.Application.Configurations;
 using Organization.Infrastructure.Configuration;
@@ -11,6 +12,23 @@ var configBuilderAppsettingsFile = new ConfigurationBuilder().AddJsonFile("appse
 
 //instantiate a loggerConfigFile and read configBuilderAppsettingsFile and create a log
 Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configBuilderAppsettingsFile).CreateLogger();
+
+
+//If the JSON configuration continues to fail,
+//you can bypass the JSON configuration error by
+//configuring the sink directly in your code during startup.
+#pragma warning disable
+//Log.Logger = new LoggerConfiguration()
+//    .ReadFrom.Configuration(configBuilderAppsettingsFile)
+//    .WriteTo.MSSqlServer(
+//        connectionString: configBuilderAppsettingsFile.GetConnectionString("SqlConnection"),
+//        sinkOptions: new Serilog.Sinks.MSSqlServer.MSSqlServerSinkOptions
+//        {
+//            TableName = "Logs",
+//            AutoCreateSqlTable = true
+//        }
+//    )
+//    .CreateLogger();
 
 //to make sure our Organization.Presentation.API starts or NOT START due to ANY ERROR
 //we add a TRY-CATCH blck to log either EVENTs

@@ -8,6 +8,10 @@
 
         public static class ConfigurationSections
         {
+            //creating a GLOBAL constant "OrganizationAppSection"
+            //for Appsettings.json’s section "OrganizationAppSection"
+            public const string OrganizationApp = "OrganizationAppSection";
+
             public const string Jwt = "Jwt";
             public const string My3rdpartyProductOptions = "My3rdpartyProductoptions";
         }

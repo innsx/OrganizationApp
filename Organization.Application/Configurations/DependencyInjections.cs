@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Organization.Application.Commons.ApplicationConfigOptions;
 using Organization.Application.Commons.PipelineBehaviours;
 using Serilog;
 
@@ -47,6 +48,10 @@ namespace Organization.Application.Configurations
             //Using Reflection, we Registering all Validators which are available
             // in this DependencyInjections class & within current running Assembly 
             services.AddValidatorsFromAssembly(typeof(DependencyInjections).Assembly);
+
+            //Registering OrganizationOptionsSetup.cs class as
+            //a parameter of the TYPED OrganizationOptionsSetup in IServiceCollection.ConfigureOptions
+            services.ConfigureOptions<OrganizationOptionsSetup>();
 
             return services;
         }

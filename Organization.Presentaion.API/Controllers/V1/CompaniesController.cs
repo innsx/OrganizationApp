@@ -1,13 +1,15 @@
 ﻿using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Organization.Application.Commons.ApplicationConfigOptions;
 using Organization.Application.Commons.CQRS.CompanyModule.Commands;
 using Organization.Application.Commons.CQRS.CompanyModule.Queries;
+using Organization.Application.Commons.CQRS.CompanyModule.Queries.GetCompanyCount;
 using Organization.Application.Commons.DTOs;
 using Organization.Application.Commons.Interfaces.Persistance;
 using Organization.Application.Commons.Utilities;
 using Organization.Domain.Company;
-using Organization.Domain.Employees;
 
 namespace Organization.Presentaion.API.Controllers.V1
 {
@@ -18,19 +20,17 @@ namespace Organization.Presentaion.API.Controllers.V1
     [Produces("application/json")]
     public sealed class CompaniesController : BaseAPIController
     {
-        private readonly IUnitOfWork _unitOfWork;
-
         //initializing a repository of the type IGenericRepository<TEntity>
         //public IGenericRepository<Company> companyRepository;
-
         private readonly ISender _sender;
         private readonly IMapper _mapper;
+        private readonly OrganizationOption _organizationOption;
 
-        public CompaniesController(IUnitOfWork unitOfWork, ISender sender, IMapper mapper)
-        {
-            //_unitOfWork = unitOfWork;
+        public CompaniesController(ISender sender, IMapper mapper, IOptions<OrganizationOption> organizationOption)
+        {           
             _sender = sender;
             _mapper = mapper;
+            _organizationOption = organizationOption.Value;
 
             //using the FACTORY REPOSITORY pattern,
             //companyRepository = _unitOfWork.RepositoryFactory<Company>();
@@ -140,6 +140,18 @@ namespace Organization.Presentaion.API.Controllers.V1
                 result => Ok($"Successfully SoftDeleted Company with Id: {id}."),
                 errors => GetProblemFromErrorsCollection(errors)
             );
+        }
+
+        [HttpGet("count")]
+        public async Task<IActionResult> GetCompanyCount()
+        {
+            Console.WriteLine("\nConsole WriteLine: \n");
+            Console.WriteLine(_organizationOption.Name);
+            Console.WriteLine(_organizationOption.Address);
+            Console.WriteLine(_organizationOption.ConfidentialData);
+            Console.WriteLine("\n\n");
+
+            return Ok(await _sender.Send(new GetCompanyCountQuery()));
         }
     }
 }
