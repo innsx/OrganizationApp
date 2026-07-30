@@ -147,10 +147,12 @@ namespace Organization.Presentaion.API.Controllers.V1
         [HttpGet("count")]
         public async Task<IActionResult> GetCompanyCount()
         {
+            var organizationSection = _organizationOption;
+
             Console.WriteLine("\nConsole WriteLine: \n");
-            Console.WriteLine(_organizationOption.Name);
-            Console.WriteLine(_organizationOption.Address);
-            Console.WriteLine(_organizationOption.ConfidentialData);
+            Console.WriteLine(organizationSection.Name);
+            Console.WriteLine(organizationSection.Address);
+            Console.WriteLine(organizationSection.ConfidentialData);
             Console.WriteLine("\n\n");
 
             return Ok(await _sender.Send(new GetCompanyCountQuery()));

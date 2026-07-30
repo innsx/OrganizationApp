@@ -49,8 +49,8 @@ namespace Organization.Application.Configurations
             // in this DependencyInjections class & within current running Assembly 
             services.AddValidatorsFromAssembly(typeof(DependencyInjections).Assembly);
 
-            //Registering OrganizationOptionsSetup.cs class as
-            //a parameter of the TYPED OrganizationOptionsSetup in IServiceCollection.ConfigureOptions
+            //STEP 3. Register the OrganizationOptionsSetup.cs class as Services
+            //You must register both your options class and your custom setup provider in your Program.cs file.
             services.ConfigureOptions<OrganizationOptionsSetup>();
 
             return services;

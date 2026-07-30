@@ -45,6 +45,14 @@ try
         .AddPresentation()
         .AddInfastructure();
 
+    //Check if App is in Development or Production Environment
+    //if (builder.Environment.IsProduction())
+    //{
+    //    //if isProduction, we're using the Configured Key Vault in Azure
+    //    builder.ConfigureAzureKeyVault();
+    //}
+
+    //else isDevelopment Environment & used the Secret saved in our local Machine
     var app = builder.Build();
 
     //we needed to Get a SERVICE of the TYPE IApiVersionDescriptionProvider
@@ -72,7 +80,6 @@ try
                 c.DisplayRequestDuration();
             }
         });
-
     }
 
     // we will add this line as a middleware PIPELINE
