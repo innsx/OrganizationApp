@@ -10,6 +10,7 @@
   <PropertyGroup>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <UserSecretsId>D65D6DAC-EF51F-4486-AD29-FB49A8CDD215</UserSecretsId>
   </PropertyGroup>
 
 
@@ -24,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Organization.Domain\Organization.Domain.csproj" />
     <ProjectReference Include="..\Organization.Infrastructure\Organization.Infrastructure.csproj" />
   </ItemGroup>
 

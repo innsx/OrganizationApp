@@ -1,11 +1,11 @@
-﻿using FluentValidation;
-using MediatR;
+﻿using MediatR;
+using Serilog;
 using Microsoft.Extensions.DependencyInjection;
+using FluentValidation;
 using Organization.Application.Commons.ApplicationConfigOptions;
 using Organization.Application.Commons.PipelineBehaviours;
-using Serilog;
 
-namespace Organization.Application.Configurations
+namespace Organization.Domain.Configurations
 {
     public static class DependencyInjections
     {

@@ -11,6 +11,7 @@ namespace Organization.Infrastructure.Persistance
         //NOTE: We are not using the RepositoryFactory to create repositories here,
         public ICompanyRepository Companies { get; private set; }
         public IEmployeeRepository Employees { get; private set; }
+        public IUserRepository Users { get; set; }
 
         //If we were using the FACTORY REPOSITORY pattern,
         //we would have a private field for the IRepositoryFactory
@@ -41,6 +42,7 @@ namespace Organization.Infrastructure.Persistance
             //rather than using a factory.
             Companies = new CompanyRepository(_dapperDataContext);
             Employees = new EmployeeRepository(_dapperDataContext);
+            Users = new UserRepository(_dapperDataContext);
         }
 
 

@@ -74,11 +74,13 @@
     <Build Include="dbo\StoredProcedures\uspSoftDeleteForeignKeyRecord.sql" />
     <Build Include="dbo\StoredProcedures\uspGetTotalRecordsCount.sql" />
     <Build Include="dbo\StoredProcedures\uspDoesRecordExist.sql" />
+    <Build Include="dbo\StoredProcedures\uspGetRecordsBySpecificColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="InitializationScript.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Organization.DB.publish.xml" />
+    <None Include="dbo\Tables\tblUserDetails.sql" />
   </ItemGroup>
 </Project>

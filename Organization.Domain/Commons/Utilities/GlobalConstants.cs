@@ -12,7 +12,9 @@
             //for Appsettings.json’s section "OrganizationAppSection"
             public const string OrganizationAppSection = "OrganizationAppSection";
 
+            //creating a GLOBAL constant "Jwt" for Appsettings.json section "Jwt"
             public const string Jwt = "Jwt";
+
             public const string My3rdpartyProductOptions = "My3rdpartyProductoptions";
         }
 

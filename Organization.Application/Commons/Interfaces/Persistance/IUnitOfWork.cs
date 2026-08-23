@@ -1,11 +1,11 @@
-﻿using Organization.Domain.Commons.BaseEntity;
-
-namespace Organization.Application.Commons.Interfaces.Persistance
+﻿namespace Organization.Application.Commons.Interfaces.Persistance
 {
     public interface IUnitOfWork : IDisposable
     {
+        // get, set Properties
         public ICompanyRepository Companies { get; }
         public IEmployeeRepository Employees { get; }
+        public IUserRepository Users { get; set; }
 
 
         //In C#, where T : IDbEntity is a generic type constraint.
@@ -19,3 +19,4 @@ namespace Organization.Application.Commons.Interfaces.Persistance
         public void RollbackDbTransactionAndDispose();
     }
 }
+ 

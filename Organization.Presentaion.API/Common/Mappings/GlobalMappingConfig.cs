@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using Organization.Application.Commons.CQRS.CompanyModule.Commands;
 using Organization.Application.Commons.CQRS.EmployeeModule.Commands;
+using Organization.Application.Commons.CQRS.UserModule.Commands.RegisterUser;
 using Organization.Application.Commons.DTOs;
 
 namespace Organization.Presentaion.API.Common.Mappings
@@ -21,6 +22,11 @@ namespace Organization.Presentaion.API.Common.Mappings
             config.NewConfig<(string Id, UpdateEmployeeRequestDto updateEmployeeRequestDto), UpdateEmployeeCommand>()
                 .Map(dest => dest.Id, src => src.Id)			//mapping dest.Id from src.Id
                 .Map(dest => dest, src => src.updateEmployeeRequestDto); //mapping the REST of dest Obj from src obj	
+
+            //MAPPINGS from SOURCE RegisterUserCommand to DISTINATION RegisterUserRequestDto
+            config.NewConfig<RegisterUserRequestDto, RegisterUserCommand>()
+                .Map(dest => dest.registerUserRequestDto, src => src);
+
         }
     }
 }

@@ -91,8 +91,26 @@ namespace Organization.Infrastructure.Persistance.Repositories
 
                 return record!;
             }
-
         }
+
+        public async Task<IEnumerable<TEntity>> GetBySpecificColumnAsync(string columnName, string columnValue, params string[] selectData)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("tableName", typeof(TEntity).GetDbTableName(), DbType.String, ParameterDirection.Input, size: 50);
+            parameters.Add("columnName", columnName, DbType.String, ParameterDirection.Input, size: 60);
+            parameters.Add("columnValue", columnValue, DbType.String, ParameterDirection.Input, size: 100);
+
+            if (selectData != null || selectData.Length > 0)
+            {
+                parameters.Add("columns", typeof(TEntity).GetDbTableColumnNames(selectData), DbType.String, ParameterDirection.Input);
+            }
+
+            using (var connection = _dapperDataContext.Connection)
+            {
+                return await connection.QueryAsync<TEntity>("uspGetRecordsBySpecificColumn", parameters, commandType: CommandType.StoredProcedure);
+            }
+        }
+
 
         public async Task<int> GetTotalCountAsync()
         {

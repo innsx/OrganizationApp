@@ -42,6 +42,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// This endpoint gets all the companies in the system.
         /// </summary>
         /// <respone code="200">Returns paged list of all companies in the system</respone>
+        /// https://localhost:7160/api/v1/Companies?FilterBy=Inc&PageNumber=1&PageSize=5&SortBy=Name&SortOrder=Desc
         [ProducesResponseType(typeof(PageList<CompanyResponseDto>), 200)]
         [HttpGet]
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyQueryParameters companyQueryParameters)
@@ -62,6 +63,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <response code="200">Gets a comapny successfully.</response>
         /// <response code="404">Could not find the company.</response>
         /// <returns>Company</returns>
+        /// api/v1/Companies/GetCompanyById/1&hasAssociatedObject=true
         [HttpGet("{id:length(22)}")]
         public async Task<IActionResult> GetCompanyById(string id, bool hasAssociatedObject = false)
         {
@@ -74,13 +76,14 @@ namespace Organization.Presentaion.API.Controllers.V1
                 errors => GetProblemFromErrorsCollection(errors)
             );
         }
-         
+
 
         /// <summary>
         /// This endpoint adds a company in the system.
         /// </summary>
         /// <param name="companyRequestDto">**companyRequestDto**</param>
         /// <response code="201">Adds a company successfullly</response>
+        /// https://localhost:7160/api/v1/Companies
         [HttpPost]
         public async Task<IActionResult> AddCompany([FromBody] CompanyRequestDto companyRequestDto)
         {
@@ -102,7 +105,7 @@ namespace Organization.Presentaion.API.Controllers.V1
             return result.Match(
                     result => Ok(result),
                     errors => GetProblemFromErrorsCollection(errors)
-                    );
+            );
 
         }
 
@@ -112,6 +115,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <param name="id">**string**</param>
         /// <param name="companyRequestDto">**companyRequestDto**</param>
         /// <response code="201">Updates a company successfullly</response>
+        /// https://localhost:7160/api/v1/Companies/_eeFtwUd7kyV4MtZcUOH0g
         [HttpPut("{id:length(22)}")]
         public async Task<IActionResult> UpdateCompany(string id, [FromBody] CompanyRequestDto companyRequestDto)
         {
@@ -133,6 +137,7 @@ namespace Organization.Presentaion.API.Controllers.V1
         /// <param name="id">**string**</param>
         /// <param name="isDeleteHasAssociations">**CompanyRequest**</param>
         /// <response code="201">SoftDeletes a company successfullly</response>
+        /// https://localhost:7160/api/v1/Companies/_eeFtwUd7kyV4MtZcUOH0g?isDeleteHasAssociations=false
         [HttpDelete("{id:length(22)}")]
         public async Task<IActionResult> DeleteCompany(string id, bool isDeleteHasAssociations = false)
         {
@@ -144,6 +149,11 @@ namespace Organization.Presentaion.API.Controllers.V1
             );
         }
 
+        /// <summary>
+        /// This endpoint gets the count of companies in the system.
+        /// </summary>
+        /// <returns>The count of companies</returns>
+        /// https://localhost:7160/api/v1/Companies/count
         [HttpGet("count")]
         public async Task<IActionResult> GetCompanyCount()
         {

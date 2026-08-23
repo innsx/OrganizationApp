@@ -1,10 +1,12 @@
 ﻿using ErrorOr;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Organization.Application.Commons.Utilities;
 
 namespace Organization.Presentaion.API.Controllers
 {
+    [Authorize]
     public class BaseAPIController : ControllerBase
     {
         //NOTE: this ProblemFromErrors method MUST be "protected"
@@ -38,7 +40,7 @@ namespace Organization.Presentaion.API.Controllers
         {
             var statusCode = error.Type switch
             {
-                //swith - case statements to check the error.Type & return appropriate StatusCode 
+                //swith - case statements check the error.Type & return appropriate StatusCode 
                 ErrorType.Conflict => StatusCodes.Status409Conflict,
                 ErrorType.Validation => StatusCodes.Status400BadRequest,
                 ErrorType.NotFound => StatusCodes.Status404NotFound,
@@ -47,7 +49,7 @@ namespace Organization.Presentaion.API.Controllers
                 _ => StatusCodes.Status500InternalServerError
             };
 
-            //this is the ObjectResult "Problem( )" method which Microsoft.aspnetcore.Mvc provides
+            //this is the ObjectResult default "Problem( )" method which Microsoft.aspnetcore.Mvc provides
             return Problem(detail: error.Code, statusCode: statusCode, title: error.Description);
         }
 
@@ -63,7 +65,7 @@ namespace Organization.Presentaion.API.Controllers
                 modelStateDictionary.AddModelError(error.Code, error.Description);
             }
 
-            //then RETURN erros to ObjectResult's ValidationProblem which MicroSoft.aspnetcore.mvc provides
+            //then RETURN errors to ObjectResult's ValidationProblem which MicroSoft.aspnetcore.mvc provides
             return ValidationProblem(modelStateDictionary);
         }
     }

@@ -17,7 +17,7 @@ namespace Organization.Application.Commons.ApplicationConfigOptions
     //Step 2. Implement IConfigureOptions<OrganizationOption>
     //Create a dedicated class that implements the interface.
     //The DI container injects any necessary external services directly into its constructor.
-    public class OrganizationOptionsSetup : IConfigureOptions<OrganizationOptionOLD>
+    public class OrganizationOptionsSetup : IConfigureOptions<OrganizationOption>
     {
         private readonly IConfiguration _configuration;
 
@@ -27,7 +27,7 @@ namespace Organization.Application.Commons.ApplicationConfigOptions
             _configuration = configuration;
         }
 
-        public void Configure(OrganizationOptionOLD organizationOptions)
+        public void Configure(OrganizationOption organizationOptions)
         {
             //here we're HARD-CODED "OrganizationAppSection" section in AppSettings.json file
             //& then binding ALL Appsettings.json's "OrganizationAppSection" Section's settings
@@ -41,7 +41,7 @@ namespace Organization.Application.Commons.ApplicationConfigOptions
             //we're DYNAMICALLY calling Appsettings.json's Section "OrganizationAppSection"
             // settings during RUNTIME & bind the OrganizationAppSection values to an “options” object
             // of TYPED OrganizationOption
-            _configuration.GetSection(GlobalConstantsOLD.ConfigurationSections.OrganizationAppSection).Bind(organizationOptions);
+            _configuration.GetSection(GlobalConstants.ConfigurationSections.OrganizationAppSection).Bind(organizationOptions);
 
         }
     }
