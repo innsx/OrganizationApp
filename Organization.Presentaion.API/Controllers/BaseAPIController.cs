@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Organization.Application.Commons.Utilities;
+using Organization.Domain.Commons.Errors.CustomsEnums;
 
 namespace Organization.Presentaion.API.Controllers
 {
@@ -16,17 +17,18 @@ namespace Organization.Presentaion.API.Controllers
             if (errors.Count is 0)
             {
                 //ObjectResult.ControllerBase.Problem()
-                //if COUNT = 0, then return the ERRORs in the Microsoft.aspnetcore.Mvc's Problem( )
-                return Problem();  //create objectResult for the response
+                //if COUNT = 0, then return the ERRORs from Microsoft.aspnetcore.Mvc's
+                //Problem( ) method which is a default ObjectResult for the response
+                return Problem();  
             }
 
-            //else we have MULTIPLE Errors &
+            //if we have MULTIPLE Errors &
             //check if EACH error type is a "VALIDATION" type
             if (errors.All(error => error.Type == ErrorType.Validation))
             {
                 //if All errors are of type "Validation",
                 //then add each error to ModelStateDictionary & return ValidationProblem(ModelStateDictionary)
-                return AddEachErrorToModelStateDictionary(errors);
+                return AddErrorCollectionInToModelStateDictionary(errors);
             }
 
             //else get & set key/value errors collection of HttpContext.Items named "errors"
@@ -38,12 +40,17 @@ namespace Organization.Presentaion.API.Controllers
 
         private IActionResult GetErrorsDetails(Error error)
         {
-            var statusCode = error.Type switch
+            //switch statement to determine the appropriate HTTP status code based on the error type
+            var statusCode = (int)error.Type switch
             {
-                //swith - case statements check the error.Type & return appropriate StatusCode 
-                ErrorType.Conflict => StatusCodes.Status409Conflict,
-                ErrorType.Validation => StatusCodes.Status400BadRequest,
-                ErrorType.NotFound => StatusCodes.Status404NotFound,
+                //swith - case statements check the error.Type & return appropriate StatusCode                 
+                (int)ErrorType.Conflict => StatusCodes.Status409Conflict,
+                (int)ErrorType.Validation => StatusCodes.Status400BadRequest,
+                (int)ErrorType.NotFound => StatusCodes.Status404NotFound,
+
+                (int)CustomEnumWithErrorTypes.UnAuthorized => StatusCodes.Status401Unauthorized,
+                (int)CustomEnumWithErrorTypes.Forbidden => StatusCodes.Status403Forbidden,
+
 
                 //Default option as "catch-all" for any other error types not specified above
                 _ => StatusCodes.Status500InternalServerError
@@ -53,7 +60,8 @@ namespace Organization.Presentaion.API.Controllers
             return Problem(detail: error.Code, statusCode: statusCode, title: error.Description);
         }
 
-        private IActionResult AddEachErrorToModelStateDictionary(List<Error> errors)
+
+        private IActionResult AddErrorCollectionInToModelStateDictionary(List<Error> errors)
         {
             //from Microsoft.AspNetCore.Mvc.ModelBinding
             var modelStateDictionary = new ModelStateDictionary();

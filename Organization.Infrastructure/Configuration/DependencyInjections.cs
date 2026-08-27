@@ -27,7 +27,7 @@ namespace Organization.Infrastructure.Configuration
             //then we register the service using 
             //1 of 3 services: AddScoped(), AddTranscent(), AddSingleton( )
             //registering the JwtTokenGenerator class as a singleton service in the dependency injection container.
-            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+            services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
             //if a service is an Authentication,
             //then we register the service using AddAuthentication().AddJwtBearer()
@@ -37,6 +37,15 @@ namespace Organization.Infrastructure.Configuration
             //then we register the service using
             //ConfigureOptions( )
             services.ConfigureOptions<JwtBearerOptionsSetup>();
+
+
+            //registering IHttpContextAccessor with AddHttpContextAccessor()
+            //because any CLASS other the CONTROLLER CLASSES,
+            //we need to ACCESS the REQUEST/RESPONSE by the CLIENT
+            //this process is DONE thru "HttpContextAccessor"
+            //therefore, we needed to REGISTER HttpContextAccessor
+            // when IHttpContextAccessor is INJECTED anywhere in our OrganisationApp
+            services.AddHttpContextAccessor();
 
             return services;
         }

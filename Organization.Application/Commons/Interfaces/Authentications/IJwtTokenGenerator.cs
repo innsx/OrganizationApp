@@ -1,9 +1,10 @@
 ﻿using Organization.Application.Commons.DTOs;
+using Organization.Domain.Users.Models;
 
 namespace Organization.Application.Commons.Interfaces.Authentications
 {
     public interface IJwtTokenGenerator
     {
-        string GenerateToken(ValidUserResponseDto validUserResponseDto);
+        Task<string> DoTokenCreationAsync(User user);
     }
 }

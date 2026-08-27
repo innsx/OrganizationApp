@@ -19,6 +19,13 @@ namespace Organization.Domain.Users.Models
 
         [ColumnName("PasswordHash")]
         public string PasswordHash { get; set; } = string.Empty;
+
+        [ColumnName("RefreshToken")]
+        public string? RefreshToken { get; set; } = string.Empty;
+
+        [ColumnName("RefreshTokenExpiryDate")]
+        public DateTime? RefreshTokenExpiryDate { get; set; }
+
     }
 
 }

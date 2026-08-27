@@ -53,6 +53,15 @@ namespace Organization.Domain.Configurations
             //You must register both your options class and your custom setup provider in your Program.cs file.
             services.ConfigureOptions<OrganizationOptionsSetup>();
 
+            //registering IHttpContextAccessor with AddHttpContextAccessor()
+            //because any CLASS other the CONTROLLER CLASSES,
+            //we need to ACCESS the REQUEST/RESPONSE by the CLIENT
+            //this process is DONE thru "HttpContextAccessor"
+            //therefore, we needed to REGISTER HttpContextAccessor
+            // when IHttpContextAccessor is INJECTED anywhere in our OrganisationApp
+            //services.AddHttpContextAccessor();
+
+
             return services;
         }
     }

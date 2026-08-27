@@ -52,5 +52,20 @@ namespace Organization.Presentaion.API.Controllers.V1
             );
         }
 
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(RefreshTokenRequestDto refreshTokenRequestDto)
+        {
+            // Map the RefreshTokenRequestDto to a RefreshTokenCommandDto using Mapster
+            var refreshTokenCommand = _mapper.Map<RefreshTokenCommandDto>(refreshTokenRequestDto);
+
+            // Send the RefreshTokenCommand to the MediatR pipeline
+            var result = await _sender.Send(refreshTokenCommand);
+
+            // Use the Match method to handle the result and return the appropriate IActionResult
+            return result.Match(
+                r => Ok(r),
+                errors => GetProblemFromErrorsCollection(errors) // Return a ProblemDetails response with the errors
+            );
+        }
     }
 }
